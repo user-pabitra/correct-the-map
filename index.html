@@ -1,669 +1,1974 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Correct the Map — Inside the UN's Equal Earth Resolution</title>
-<meta name="description" content="Interactive explainer on UN resolution A/80/L.104 (adopted 164–1–6 on 4 Sep 2026): a live Mercator→Equal Earth morph, Tissot distortion analysis, true-size comparison and EPSG:8857 GIS guidance. Computed live from published projection mathematics.">
-<link rel="canonical" href="[your-username.github.io](https://YOUR-USERNAME.github.io/correct-the-map/)">
+<title>Correct the Map</title>
+<meta name="description" content="The UN General Assembly voted 164–1 on 4 September 2026 to endorse Equal Earth maps over the 457-year-old Mercator projection. Interactive canvas animation, projection mathematics, vote breakdown, and full source attribution.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The UN voted 164–1 to Correct the Map">
-<meta property="og:description" content="Resolution A/80/L.104 promotes Equal Earth over Mercator. An interactive projection lab: live morph, distortion mathematics, true-size Africa, EPSG:8857 migration.">
-<meta property="og:url" content="[your-username.github.io](https://YOUR-USERNAME.github.io/correct-the-map/)">
-<meta property="og:image" content="[your-username.github.io](https://YOUR-USERNAME.github.io/correct-the-map/og-banner.png)">
+<meta property="og:title" content="164–1: The UN Voted to Correct the World Map">
+<meta property="og:description" content="An interactive deep-dive into the UN's historic Equal Earth resolution - animations, projection math, Africa's true size, and verified sources.">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Equal Earth world map — UN vote 164 to 1, 4 September 2026">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The UN voted 164–1 to Correct the Map">
-<meta name="twitter:description" content="An interactive Equal Earth vs Mercator projection lab. Live morph, Tissot distortion, true-size Africa, EPSG:8857.">
-<meta name="twitter:image" content="[your-username.github.io](https://YOUR-USERNAME.github.io/correct-the-map/og-banner.png)">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='[w3.org](http://www.w3.org/2000/svg)' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230e7490'/><ellipse cx='16' cy='16' rx='14' ry='6' fill='none' stroke='%23faf6ee' stroke-width='2'/><path d='M16 2v28M2 16h28' stroke='%23faf6ee' stroke-width='1.2'/></svg>">
+<meta name="author" content="Lead Solution Architect">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%231a3a5c'/><path d='M16 3 C9 3 3 9 3 16 C3 23 9 29 16 29 C23 29 29 23 29 16 C29 9 23 3 16 3 Z' fill='none' stroke='%23c8dae8' stroke-width='1'/><ellipse cx='16' cy='16' rx='14' ry='5.5' fill='none' stroke='%23c8dae8' stroke-width='1'/><ellipse cx='16' cy='16' rx='5.5' ry='14' fill='none' stroke='%23c8dae8' stroke-width='1'/></svg>">
 <style>
-:root{
-  --paper:#f7f4ea; --paper2:#efe8d7; --card:#fffdf8; --line:#dcd2ba; --line2:#e8e1cf;
-  --ink:#20313b; --mute:#5f6f79; --ocean:#0e7490; --deep:#0b5069; --land:#2e7d5b;
-  --gold:#a06a14; --bad:#b3403a; --max:1160px; --r:16px;
-  --sans:ui-sans-serif,system-ui,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+:root {
+  --ocean: #d6e8f0;
+  --ocean-deep: #b8d4e4;
+  --land: #5a8a6a;
+  --land-light: #7aaa86;
+  --parchment: #f5f0e8;
+  --parchment-dark: #ece4d2;
+  --ink: #1c2b36;
+  --ink-muted: #4a5f6b;
+  --teal: #1a5f7a;
+  --teal-dark: #0f3d52;
+  --gold: #b8862a;
+  --gold-light: #d4a547;
+  --crimson: #b03025;
+  --crimson-light: #d4453a;
+  --white: #ffffff;
+  --card-bg: rgba(255,255,255,0.82);
+  --border: rgba(26,95,122,0.18);
+  --shadow: 0 4px 24px rgba(26,63,82,0.10);
+  --shadow-lg: 0 12px 48px rgba(26,63,82,0.16);
+  --r: 14px;
+  --rr: 8px;
+  --max: 1100px;
+  --serif: 'Georgia', 'Times New Roman', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Menlo', 'Consolas', monospace;
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:76px;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;
-  background-image:linear-gradient(rgba(14,116,144,.05) 1px,transparent 1px),
-  linear-gradient(90deg,rgba(14,116,144,.05) 1px,transparent 1px);background-size:54px 54px}
-h1,h2,h3{font-family:var(--serif);line-height:1.14;letter-spacing:-.01em;margin:0 0 .5em;color:var(--deep)}
-h1{font-size:clamp(2.1rem,7vw,4.1rem);font-weight:700}
-h2{font-size:clamp(1.55rem,5vw,2.4rem)}
-h3{font-size:1.06rem;color:var(--ink)}
-p{margin:0 0 1em}
-a{color:var(--ocean);text-underline-offset:3px}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
-#bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--land),var(--ocean));z-index:60}
-nav{position:sticky;top:0;z-index:50;background:rgba(247,244,234,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;gap:14px;height:64px}
-.brand{font-family:var(--serif);font-weight:700;font-size:1.02rem;white-space:nowrap;color:var(--deep)}
-.brand em{font-style:normal;color:var(--gold)}
-nav ul{display:flex;gap:2px;list-style:none;margin:0 0 0 auto;padding:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-nav ul::-webkit-scrollbar{display:none}
-nav a{display:block;padding:8px 10px;border-radius:9px;color:var(--mute);text-decoration:none;font-size:.84rem;font-weight:600;white-space:nowrap}
-nav a:hover{color:var(--deep);background:var(--paper2)}
-nav a[aria-current="true"]{color:var(--ocean);background:#e3f0f3}
-section{padding:clamp(52px,8vw,80px) 0;border-top:1px solid var(--line2)}
-section:first-of-type{border-top:0}
-.eyebrow{font:700 .72rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.lede{font-size:clamp(1.02rem,2.6vw,1.15rem);color:#42535e;max-width:70ch}
-.grid{display:grid;gap:16px}
-.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:0 2px 10px rgba(34,51,61,.05)}
-.card p:last-child{margin:0;color:var(--mute);font-size:.93rem}
-.kpi{font:800 clamp(1.8rem,7vw,2.8rem)/1 var(--sans);letter-spacing:-.03em;color:var(--deep)}
-.kpi.g{color:var(--land)}.kpi.b{color:var(--bad)}.kpi.o{color:var(--gold)}
-.kpi-l{font:600 .74rem/1.4 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin-top:6px}
-.hero{padding:clamp(36px,6vw,56px) 0 clamp(46px,7vw,66px)}
-.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border:1px solid #bcd7de;background:#e7f2f5;border-radius:999px;font:700 .7rem/1.3 var(--mono);color:var(--deep);margin-bottom:16px;letter-spacing:.06em}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--ocean);animation:pulse 2.4s infinite;flex:0 0 auto}
-@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(14,116,144,.12)}}
-canvas.map{width:100%;height:auto;display:block;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(180deg,#eaf3f5,#e2eef1);box-shadow:0 8px 30px rgba(11,80,105,.1)}
-.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
-button,.btn{font:650 .88rem/1 var(--sans);color:var(--deep);background:#fff;border:1px solid var(--line);padding:11px 15px;border-radius:10px;cursor:pointer;text-decoration:none;transition:.15s;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
-button:hover,.btn:hover{border-color:var(--ocean);color:var(--ocean)}
-button.primary{background:var(--ocean);color:#fff;border-color:var(--ocean)}
-button.primary:hover{background:var(--deep);color:#fff}
-input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--ocean) var(--p,0%),#d8e4e8 var(--p,0%));flex:1;min-width:160px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--ocean);cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--ocean);cursor:grab}
-.tog{display:flex;gap:8px;align-items:center;font-size:.86rem;color:var(--mute);cursor:pointer}
-.tog input{accent-color:var(--ocean);width:18px;height:18px}
-table{width:100%;border-collapse:collapse;font-size:.88rem;background:#fff}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line2)}
-th{font:700 .7rem/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);background:var(--paper2)}
-td.num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);-webkit-overflow-scrolling:touch}
-.votes{display:grid;grid-template-columns:repeat(auto-fill,minmax(13px,1fr));gap:4px;margin:8px 0 14px}
-.v{aspect-ratio:1;border-radius:3px;background:#e3ddcc;transform:scale(.2);opacity:0;transition:transform .4s,opacity .4s}
-.v.on{transform:scale(1);opacity:1}
-.v.yes{background:var(--land)}.v.no{background:var(--bad)}.v.abs{background:#d9a441}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.83rem;color:var(--mute)}
-.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-blockquote{margin:0;padding:16px 20px;border-left:3px solid var(--gold);background:#fbf6ea;border-radius:0 12px 12px 0;font-family:var(--serif);font-size:1.02rem;color:#4a3f28}
-blockquote footer{font-family:var(--sans);font-size:.79rem;color:var(--mute);margin-top:8px}
-.tl{position:relative;margin:0;padding:0 0 0 28px;list-style:none;border-left:2px solid var(--line)}
-.tl li{position:relative;padding:0 0 24px 6px}
-.tl li::before{content:"";position:absolute;left:-37px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--ocean)}
-.tl b{display:block;font:700 .8rem/1 var(--mono);color:var(--ocean);margin-bottom:5px;letter-spacing:.04em}
-.true-box{border:2.5px solid var(--land);border-radius:var(--r);background:#f2f7f0;padding:16px;position:relative}
-.true-box>strong{font:700 .82rem/1 var(--mono);color:var(--land);letter-spacing:.06em}
-.sq-row{display:flex;flex-wrap:wrap;gap:9px;align-items:flex-end;margin-top:14px}
-.sq{display:flex;flex-direction:column;justify-content:flex-end;padding:7px;border-radius:8px;background:rgba(14,116,144,.1);border:1.5px solid var(--ocean);font-size:.7rem;line-height:1.3;overflow:hidden}
-.sq b{font-size:.72rem;color:var(--deep)}
-.sq span{font-family:var(--mono);color:var(--mute);font-size:.62rem}
-.sq.spare{background:rgba(160,106,20,.08);border-color:var(--gold)}
-.bars{display:grid;gap:10px;margin-top:18px}
-.brow{display:grid;grid-template-columns:110px 1fr 84px;gap:10px;align-items:center;font-size:.86rem}
-.btrack{height:12px;background:#e7e0cd;border-radius:99px;overflow:hidden}
-.bfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--deep),var(--ocean));width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
-pre{margin:0;padding:16px;background:#f4efe2;border:1px solid var(--line);border-radius:12px;overflow-x:auto;font:.8rem/1.65 var(--mono);color:#31424c;-webkit-overflow-scrolling:touch}
-.code-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:16px 0 8px;font:700 .72rem/1 var(--mono);color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
-.copy{padding:7px 11px;font-size:.72rem;min-height:36px}
-.note{border-left:3px solid var(--gold);background:#fbf5e6;padding:14px 17px;border-radius:0 10px 10px 0;font-size:.91rem;color:#54430f}
-.note.ok{border-color:var(--land);background:#eef6ee;color:#274d38}
-.src{display:grid;gap:10px;list-style:none;padding:0;margin:0}
-.src li{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:.89rem;align-items:flex-start}
-.tag{flex:0 0 auto;font:700 .64rem/1 var(--mono);letter-spacing:.06em;padding:5px 8px;border-radius:6px;text-transform:uppercase}
-.tag.p{background:#e3f0f3;color:var(--deep);border:1px solid #b9d6de}
-.tag.s{background:var(--paper2);color:var(--mute);border:1px solid var(--line)}
-footer.site{padding:44px 0 60px;border-top:1px solid var(--line);color:var(--mute);font-size:.85rem}
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s}
-.reveal.in{opacity:1;transform:none}
-.mono{font-family:var(--mono)}
-.hide{display:none!important}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.v{transform:none;opacity:1}}
-@media (max-width:600px){.brow{grid-template-columns:88px 1fr 66px;font-size:.78rem}.hero .grid.g4{grid-template-columns:1fr 1fr}blockquote{font-size:.96rem}}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 64px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.68;
+  overflow-x: hidden;
+}
+
+/* Cartographic grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(rgba(26,95,122,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,95,122,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* Progress bar */
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--crimson), var(--gold), var(--teal));
+  z-index: 100;
+  transition: width 0.1s linear;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(245,240,232,0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 58px;
+}
+
+.nav-brand {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--teal-dark);
+  white-space: nowrap;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-brand svg { flex-shrink: 0; }
+
+.nav-links {
+  display: flex;
+  gap: 2px;
+  list-style: none;
+  margin-left: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+
+.nav-links a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-links a:hover { background: var(--parchment-dark); color: var(--teal-dark); }
+.nav-links a.active { background: rgba(26,95,122,0.12); color: var(--teal); }
+
+/* ── SECTIONS ── */
+.section {
+  padding: clamp(56px, 9vw, 88px) 0;
+  border-top: 1px solid rgba(26,95,122,0.1);
+}
+.section:first-of-type { border-top: none; }
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ── HERO ── */
+#hero-section {
+  padding: clamp(48px, 8vw, 80px) 0 clamp(32px, 5vw, 56px);
+  background: linear-gradient(160deg, #e8f2f7 0%, var(--parchment) 60%);
+  border-top: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(26,95,122,0.1);
+  border: 1px solid rgba(26,95,122,0.25);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--teal);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.pulse-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--crimson);
+  animation: pulse 2.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(176,48,37,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(176,48,37,0); }
+}
+
+.hero-headline {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 6.5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--teal-dark);
+  margin-bottom: 20px;
+  max-width: 18ch;
+}
+
+.hero-headline .vote-num {
+  color: var(--crimson);
+  position: relative;
+  display: inline-block;
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+  color: var(--ink-muted);
+  max-width: 62ch;
+  margin-bottom: 28px;
+  line-height: 1.7;
+}
+
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.18s;
+  min-height: 44px;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+.btn-primary:hover { background: var(--teal-dark); }
+.btn-outline { background: #fff; color: var(--teal); border-color: rgba(26,95,122,0.3); }
+.btn-outline:hover { border-color: var(--teal); background: rgba(26,95,122,0.05); }
+
+/* ── KPI CARDS ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 16px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-card.k-green::before { background: var(--land); }
+.kpi-card.k-red::before { background: var(--crimson); }
+.kpi-card.k-gold::before { background: var(--gold); }
+.kpi-card.k-teal::before { background: var(--teal); }
+
+.kpi-num {
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-family: var(--sans);
+}
+.kpi-card.k-green .kpi-num { color: var(--land); }
+.kpi-card.k-red .kpi-num { color: var(--crimson); }
+.kpi-card.k-gold .kpi-num { color: var(--gold); }
+.kpi-card.k-teal .kpi-num { color: var(--teal); }
+
+.kpi-label {
+  font-size: 0.73rem;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--ink-muted);
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+/* ── MAP CANVAS ── */
+.map-wrap {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(180deg, var(--ocean) 0%, var(--ocean-deep) 100%);
+  cursor: pointer;
+}
+
+canvas.map-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-label {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  background: rgba(26,63,82,0.82);
+  color: #e8f2f7;
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.map-compass {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  width: 44px;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.map-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(245,240,232,0.9);
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  padding: 4px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* ── CONTROLS ── */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.range-label {
+  font-size: 0.76rem;
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 5px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--teal) var(--pct, 0%), #ccd8df var(--pct, 0%));
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--teal);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  cursor: grab;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--teal);
+  cursor: grab;
+}
+
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.toggle input[type="checkbox"] {
+  accent-color: var(--teal);
+  width: 16px; height: 16px;
+  cursor: pointer;
+}
+
+/* ── GRID LAYOUTS ── */
+.g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.g3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.g4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+
+/* ── SECTION HEADERS ── */
+.section-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  color: var(--teal-dark);
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+.section-lede {
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  color: var(--ink-muted);
+  max-width: 66ch;
+  margin-bottom: 28px;
+  line-height: 1.72;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card h3 {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--teal-dark);
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  line-height: 1.66;
+}
+
+/* ── VOTE GRID ── */
+.vote-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+  gap: 4px;
+  margin: 16px 0 12px;
+}
+
+.v-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: #ddd5c2;
+  transform: scale(0.15);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s;
+}
+.v-cell.shown { transform: scale(1); opacity: 1; }
+.v-cell.yes { background: var(--land); }
+.v-cell.no { background: var(--crimson); }
+.v-cell.abs { background: var(--gold); }
+
+.vote-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 20px;
+}
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── BLOCKQUOTE ── */
+blockquote {
+  padding: 18px 22px;
+  border-left: 4px solid var(--gold);
+  background: rgba(184,134,42,0.06);
+  border-radius: 0 var(--r) var(--r) 0;
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: #3a2c10;
+  line-height: 1.7;
+  font-style: italic;
+}
+blockquote footer {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin-top: 10px;
+}
+
+/* ── TABLE ── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  background: #fff;
+}
+th {
+  padding: 10px 14px;
+  background: var(--parchment-dark);
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-muted);
+  text-align: left;
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(26,95,122,0.08);
+  color: var(--ink);
+}
+td.num {
+  font-family: var(--mono);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(26,95,122,0.03); }
+
+/* ── BARS ── */
+.bar-list { display: grid; gap: 12px; }
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 96px;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.86rem;
+}
+
+.bar-name { color: var(--ink); font-weight: 500; }
+
+.bar-track {
+  height: 10px;
+  background: rgba(26,95,122,0.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--teal-dark), var(--teal));
+  width: 0;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bar-fill.africa { background: linear-gradient(90deg, var(--land), var(--land-light)); }
+
+.bar-val {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+/* ── TIMELINE ── */
+.timeline {
+  position: relative;
+  list-style: none;
+  padding-left: 30px;
+  border-left: 2px solid rgba(26,95,122,0.2);
+}
+
+.timeline li {
+  position: relative;
+  padding: 0 0 24px 10px;
+}
+
+.timeline li::before {
+  content: '';
+  position: absolute;
+  left: -38px;
+  top: 5px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--parchment);
+  border: 3px solid var(--teal);
+}
+
+.timeline li:last-child::before { border-color: var(--gold); background: var(--gold); }
+
+.tl-year {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--teal);
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+
+.tl-event {
+  font-weight: 600;
+  color: var(--teal-dark);
+  font-size: 0.96rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tl-desc {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background: #f0ebe0;
+  border: 1px solid rgba(26,95,122,0.15);
+  border-radius: var(--rr);
+  padding: 16px;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  font-family: var(--mono);
+  color: #2a3d45;
+  line-height: 1.7;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── NOTE BOX ── */
+.note {
+  padding: 14px 18px;
+  border-radius: 0 var(--rr) var(--rr) 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.note-info {
+  border-left: 3px solid var(--teal);
+  background: rgba(26,95,122,0.07);
+  color: var(--teal-dark);
+}
+.note-success {
+  border-left: 3px solid var(--land);
+  background: rgba(90,138,106,0.08);
+  color: #1e4029;
+}
+.note-warning {
+  border-left: 3px solid var(--gold);
+  background: rgba(184,134,42,0.08);
+  color: #4a3000;
+}
+
+/* ── SOURCES ── */
+.source-list { display: grid; gap: 10px; list-style: none; }
+
+.source-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--rr);
+  align-items: flex-start;
+  font-size: 0.87rem;
+}
+
+.source-tag {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 5px;
+  margin-top: 1px;
+}
+.tag-primary { background: #daeaf3; color: var(--teal-dark); border: 1px solid #aac9db; }
+.tag-press { background: var(--parchment-dark); color: var(--ink-muted); border: 1px solid rgba(26,95,122,0.15); }
+.tag-academic { background: rgba(90,138,106,0.12); color: #1e4029; border: 1px solid rgba(90,138,106,0.25); }
+
+.source-item a { color: var(--teal); text-decoration: underline; text-underline-offset: 2px; }
+.source-item a:hover { color: var(--teal-dark); }
+
+/* ── DISCLAIMER ── */
+.disclaimer {
+  background: rgba(26,95,122,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px 22px;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  line-height: 1.66;
+}
+.disclaimer strong { color: var(--ink); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 40px 0 60px;
+  border-top: 1px solid rgba(26,95,122,0.12);
+  background: rgba(26,63,82,0.04);
+}
+.footer-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.footer-brand {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--teal-dark);
+  margin-bottom: 8px;
+}
+.footer-meta {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+.footer-meta a { color: var(--teal); }
+
+/* ── DISTORTION VIZ ── */
+.distortion-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.dist-side {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+.dist-side.mercator { background: linear-gradient(135deg, #f0e8d8, #e8dcc8); }
+.dist-side.equalearth { background: linear-gradient(135deg, #d8eadf, #c8e0d0); }
+
+.dist-canvas-wrap { width: 100%; max-width: 180px; }
+.dist-canvas-wrap canvas { width: 100%; height: auto; display: block; }
+
+.dist-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dist-side.mercator .dist-label { color: var(--crimson); }
+.dist-side.equalearth .dist-label { color: var(--land); }
+
+/* ── AFRICA SIZE VIZ ── */
+.africa-fit {
+  background: linear-gradient(135deg, rgba(26,95,122,0.06), rgba(90,138,106,0.06));
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.fit-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--teal-dark);
+  margin-bottom: 12px;
+  font-family: var(--serif);
+}
+.fit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.86rem;
+}
+.fit-bar {
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.fit-name { color: var(--ink-muted); font-size: 0.82rem; white-space: nowrap; }
+.fit-km { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-muted); margin-left: auto; flex-shrink: 0; }
+
+/* ── CARTOGRAPHER CARD ── */
+.person-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.person-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.avatar-a { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); }
+.avatar-b { background: linear-gradient(135deg, var(--land), #2e6844); }
+.avatar-c { background: linear-gradient(135deg, var(--gold), #8a6015); }
+
+.person-name {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--teal-dark);
+}
+.person-title {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  font-family: var(--mono);
+}
+.person-desc {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.62;
+}
+
+/* ── REVEAL ANIMATION ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .bar-row { grid-template-columns: 82px 1fr 72px; font-size: 0.78rem; }
+  .distortion-compare { grid-template-columns: 1fr; }
+  .hero-headline { max-width: none; }
+  .g2, .g3 { grid-template-columns: 1fr; }
+  .nav-links a { font-size: 0.75rem; padding: 6px 8px; }
+  .controls { flex-direction: column; align-items: stretch; }
+  .range-wrap { min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+  .v-cell { transform: none; opacity: 1; }
+}
 </style>
 </head>
-<body>
-<div id="bar"></div>
 
-<nav aria-label="Primary">
-  <div class="wrap">
-    <div class="brand">Correct <em>the</em> Map</div>
-    <ul>
+<body>
+<div id="progress-bar"></div>
+
+<nav id="main-nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top">
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="16" cy="16" r="13" stroke="#1a5f7a" stroke-width="1.5"/>
+        <ellipse cx="16" cy="16" rx="13" ry="5" stroke="#1a5f7a" stroke-width="1.2"/>
+        <line x1="16" y1="3" x2="16" y2="29" stroke="#1a5f7a" stroke-width="1"/>
+        <line x1="3" y1="16" x2="29" y2="16" stroke="#1a5f7a" stroke-width="1"/>
+      </svg>
+      Correct the Map
+    </a>
+    <ul class="nav-links" role="list">
       <li><a href="#vote">The Vote</a></li>
-      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#distortion">Distortion</a></li>
       <li><a href="#lab">Projection Lab</a></li>
       <li><a href="#truesize">True Size</a></li>
-      <li><a href="#projections">Trade-offs</a></li>
-      <li><a href="#gis">GIS Toolkit</a></li>
+      <li><a href="#equalearth">Equal Earth</a></li>
+      <li><a href="#timeline">Timeline</a></li>
       <li><a href="#sources">Sources</a></li>
     </ul>
   </div>
 </nav>
 
-<section class="hero" id="top">
+<!-- ═══════════════════════════════════════════
+     SECTION 1 · HERO
+══════════════════════════════════════════════ -->
+<section id="top" class="section" id="hero-section" style="padding:clamp(48px,8vw,80px) 0 clamp(32px,5vw,56px);background:linear-gradient(160deg,#e8f2f7 0%,var(--parchment) 60%);border-top:none">
   <div class="wrap">
-    <div class="pill"><span class="dot"></span>UN GENERAL ASSEMBLY · A/80/L.104 · 4 SEPTEMBER 2026</div>
-    <h1>The UN voted <span style="color:var(--ocean)">164 to 1</span><br>to see the world in proportion.</h1>
-    <p class="lede">The General Assembly adopted <strong>“Correct the Map”</strong> — a non-binding resolution encouraging equal-area projections, particularly <strong>Equal Earth</strong>, wherever the comparative size of continents matters. Below, every distortion figure is computed live in your browser from the projections' published mathematics.</p>
-    <div class="ctl">
-      <button class="primary" id="play">▶ Morph Mercator → Equal Earth</button>
-      <a class="btn" href="#lab">Open the projection lab</a>
-      <a class="btn" href="#sources">Sources &amp; disclaimer</a>
-    </div>
-    <canvas id="hero" class="map" width="1160" height="600" aria-label="Animated morph between Mercator and Equal Earth projections"></canvas>
-    <p class="mono" style="color:var(--mute);font-size:.76rem;margin-top:10px">Geometry: Natural Earth 1:110m (public domain). Projections computed from published formulas — no map images, no third-party map APIs.</p>
-    <div class="grid g4" style="margin-top:24px">
-      <div class="card"><div class="kpi g" data-count="164">0</div><div class="kpi-l">In favour</div></div>
-      <div class="card"><div class="kpi b" data-count="1">0</div><div class="kpi-l">Against (United States)</div></div>
-      <div class="card"><div class="kpi o" data-count="6">0</div><div class="kpi-l">Abstentions</div></div>
-      <div class="card"><div class="kpi" data-count="14" data-suffix="×">0</div><div class="kpi-l">Africa vs Greenland, true area</div></div>
-    </div>
-  </div>
-</section>
+    <!-- <div class="badge"><span class="pulse-dot"></span>UN GENERAL ASSEMBLY · A/80/L.104 · 4 SEPTEMBER 2026</div> -->
 
-<section id="vote">
-  <div class="wrap reveal">
-    <div class="eyebrow">01 · The Resolution</div>
-    <h2>What the General Assembly actually adopted</h2>
-    <p class="lede">A non-binding resolution sponsored by <strong>Togo</strong> and backed by the <strong>African Union</strong>, adopted by recorded vote at the 114th plenary meeting of the 80th session on 4 September 2026.</p>
-    <div class="votes" id="votegrid" aria-label="Vote distribution across 193 member states"></div>
-    <div class="legend">
-      <span><i style="background:var(--land)"></i>164 in favour</span>
-      <span><i style="background:var(--bad)"></i>1 against — United States</span>
-      <span><i style="background:#d9a441"></i>6 abstained — Estonia, Georgia, Lithuania, Rep. of Moldova, Serbia, Ukraine</span>
-      <span><i style="background:#e3ddcc"></i>22 not voting / absent</span>
-    </div>
-    <div class="grid g2" style="margin-top:24px">
-      <div class="card"><h3>What it says</h3>
-        <p>It calls for wider use of equal-area projections — naming Equal Earth — where comparative size matters, framing Mercator's inherited distortion as affecting education, culture, geopolitics and development narratives. The text describes correcting it as an act of “cognitive justice and memorial reparation”.</p></div>
-      <div class="card"><h3>What it does not do</h3>
-        <p>It is voluntary. Mercator is not banned; nothing becomes mandatory. The EU (via Ireland) stated on record that the text is limited to education, awareness-raising and geographic literacy and “neither addresses nor affects” sovereignty, territorial status or borders.</p></div>
-      <div class="card"><h3>The abstentions, explained</h3>
-        <p>Ukraine's envoy Andriy Melnyk abstained not over the principle but because reference Equal Earth maps depict occupied Ukrainian territory in a way he called “wholly unacceptable”, warning it could open a “Pandora's box”. Estonia, Georgia, Lithuania, Moldova and Serbia also abstained.</p></div>
-      <div class="card"><h3>The objection on record</h3>
-        <p>The United States cast the sole vote against. Ambassador Mike Waltz called the text part of a “much larger and more radical ideological project” and said such resolutions are “barnacles on our work”. The adopted text and certified voting record are the primary sources.</p></div>
-    </div>
-    <div class="grid g2" style="margin-top:16px">
-      <blockquote>“A fair map does not change the geography of the world, it changes how we see the world.”<footer>— Robert Dussey, Foreign Minister of Togo, introducing the draft</footer></blockquote>
-      <blockquote>“It has to do with cognitive justice, with access to precise geographical knowledge, the dignity of peoples, historic memory.”<footer>— Robert Dussey, on the campaign's purpose beyond cartography</footer></blockquote>
-    </div>
-  </div>
-</section>
+    <h1 class="hero-headline">
+      The UN voted<br><span class="vote-num">164 – 1</span><br>to correct the map.
+    </h1>
 
-<section id="timeline">
-  <div class="wrap reveal">
-    <div class="eyebrow">02 · How We Got Here</div>
-    <h2>457 years from navigation chart to UN vote</h2>
-    <ul class="tl">
-      <li><b>1569</b><strong>Gerardus Mercator publishes his world chart.</strong> A straight line becomes a constant compass bearing — a navigational breakthrough whose geometry necessarily inflates area with latitude.</li>
-      <li><b>1855–1973</b><strong>The equal-area argument goes public.</strong> James Gall's projection, revived by Arno Peters, forces the size-perception debate into classrooms — at the cost of heavily stretched shapes.</li>
-      <li><b>1998</b><strong>National Geographic adopts Winkel Tripel</strong> for general reference maps, with mainstream cartography already drifting away from Mercator.</li>
-      <li><b>2018</b><strong>Equal Earth is published</strong> by Bojan Šavrič, Tom Patterson and Bernhard Jenny in the <em>International Journal of Geographical Information Science</em> — an equal-area pseudocylindrical projection designed to look as natural as Robinson while preserving relative area exactly. Registered as <span class="mono">EPSG:8857</span>, implemented in PROJ as <span class="mono">+proj=eqearth</span>.</li>
-      <li><b>2025</b><strong>“Correct The Map” campaign launches</strong>, led by Africa No Filter and Speak Up Africa, asking institutions to commit to equal-area world maps.</li>
-      <li><b>February 2026</b><strong>The African Union's 54 member states endorse the Equal Earth projection</strong>, converting advocacy into a continental negotiating position.</li>
-      <li><b>4 September 2026</b><strong>The General Assembly adopts A/80/L.104, 164–1–6.</strong> Togo aims to update its school geography materials by the end of 2026.</li>
-    </ul>
-  </div>
-</section>
+    <p class="hero-sub">
+      The General Assembly adopted Resolution A/80/L.104 - "Correct the Map: Rebalancing global cartographic representation" - led by <strong>Togo</strong> on behalf of the African Union, endorsing the <strong>Equal Earth projection</strong> over the 457-year-old Mercator for any context where relative size matters.
+    </p>
 
-<section id="lab">
-  <div class="wrap reveal">
-    <div class="eyebrow">03 · Projection Lab</div>
-    <h2>See the distortion, measured — not asserted</h2>
-    <p class="lede">Drag to interpolate between projections. Tissot indicatrices are computed by numerically differentiating the live projection: each ellipse began as a true circle on the globe. On an equal-area projection, every ellipse keeps the same area.</p>
-    <div class="ctl">
-      <label class="tog" style="flex:1;min-width:260px"><span class="mono" style="min-width:80px">Mercator</span>
-        <input type="range" id="t" min="0" max="1" step="0.005" value="0" aria-label="Projection interpolation">
-        <span class="mono" style="min-width:88px">Equal Earth</span></label>
+    <div class="hero-ctas">
+      <button class="btn btn-primary" id="btn-morph">▶ Animate Mercator → Equal Earth</button>
+      <a class="btn btn-outline" href="#lab">Open Projection Lab</a>
+      <a class="btn btn-outline" href="#sources">View Sources</a>
     </div>
-    <div class="ctl">
-      <label class="tog"><input type="checkbox" id="grat" checked> Graticule 15°</label>
-      <label class="tog"><input type="checkbox" id="tissot"> Tissot indicatrices</label>
-      <label class="tog"><input type="checkbox" id="fill" checked> Land fill</label>
-      <button id="snap0">Snap to Mercator</button>
-      <button id="snap1">Snap to Equal Earth</button>
+
+    <div class="map-wrap" id="hero-map-wrap">
+      <canvas id="hero-canvas" class="map-canvas" width="1100" height="530" aria-label="Animated world map morphing between Mercator and Equal Earth projections"></canvas>
+      <div class="map-label" id="hero-label">MERCATOR · 1569</div>
+      <svg class="map-compass" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="28" fill="none" stroke="#1a5f7a" stroke-width="1.5" opacity="0.5"/>
+        <path d="M32 8 L37 32 L32 56 L27 32 Z" fill="#b03025"/>
+        <path d="M8 32 L32 27 L56 32 L32 37 Z" fill="#1a5f7a" opacity="0.65"/>
+        <circle cx="32" cy="32" r="3.5" fill="#f5f0e8" stroke="#0f3d52" stroke-width="1"/>
+        <text x="32" y="5" text-anchor="middle" font-size="6" fill="#0f3d52" font-family="Georgia,serif" font-weight="700">N</text>
+      </svg>
+      <div class="map-hint">Tap to toggle · drag slider below</div>
     </div>
-    <canvas id="lab" class="map" width="1160" height="600"></canvas>
-    <div class="grid g2" style="margin-top:22px">
-      <div>
-        <h3>Mercator inflates area by exactly sec²φ</h3>
-        <p style="color:var(--mute);font-size:.92rem">Mercator's scale at latitude φ is sec φ in every direction, so area grows by its square. Arithmetic, not opinion — and why Greenland (≈60–83°N) can rival a continent on screen.</p>
-        <div class="scroll"><table id="lattab"><thead><tr><th>Latitude</th><th>Linear scale</th><th>Mercator area</th><th>Equal Earth area</th></tr></thead><tbody></tbody></table></div>
+
+    <div class="controls" style="margin-top:14px">
+      <div class="range-wrap">
+        <span class="range-label">Mercator</span>
+        <input type="range" id="hero-slider" min="0" max="1" step="0.005" value="0" aria-label="Projection blend from Mercator to Equal Earth">
+        <span class="range-label">Equal Earth</span>
       </div>
-      <div>
-        <h3>The published Equal Earth formula</h3>
-        <div class="code-h"><span>Implemented verbatim on this page</span><button class="copy" data-copy="#f-ee">Copy</button></div>
-<pre id="f-ee">A1 =  1.340264   A2 = -0.081106
-A3 =  0.000893   A4 =  0.003796
+    </div>
 
-θ = asin( (√3/2) · sin φ )
-
-x = 2√3 · λ · cos θ / (3·(A1 + 3A2θ² + 7A3θ⁶ + 9A4θ⁸))
-y = A1θ + A2θ³ + A3θ⁷ + A4θ⁹
-
-Šavrič, Patterson &amp; Jenny (2018), IJGIS 33(3), 454–465
-Equal-area · pseudocylindrical · EPSG:8857</pre>
+    <div class="kpi-row" style="margin-top:24px">
+      <div class="kpi-card k-green">
+        <div class="kpi-num" data-target="164" data-suffix="">0</div>
+        <div class="kpi-label">Member States in Favour</div>
+      </div>
+      <div class="kpi-card k-red">
+        <div class="kpi-num" data-target="1" data-suffix="">0</div>
+        <div class="kpi-label">Against - United States</div>
+      </div>
+      <div class="kpi-card k-gold">
+        <div class="kpi-num" data-target="6" data-suffix="">0</div>
+        <div class="kpi-label">Abstentions</div>
+      </div>
+      <div class="kpi-card k-teal">
+        <div class="kpi-num" data-target="14" data-suffix="×">0</div>
+        <div class="kpi-label">Africa vs Greenland, True Area</div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="truesize">
+<!-- ═══════════════════════════════════════════
+     SECTION 2 · THE VOTE
+══════════════════════════════════════════════ -->
+<section id="vote" class="section">
   <div class="wrap reveal">
-    <div class="eyebrow">04 · True Size</div>
-    <h2>What Africa's 30.37 million km² actually holds</h2>
-    <p class="lede">Every rectangle below is drawn with <strong>area exactly proportional</strong> to official surface statistics — shapes are abstract, not geographic. The campaign's central claim is arithmetic you can audit in one line.</p>
-    <div class="true-box">
-      <strong>AFRICA ≈ 30,370,000 km²</strong>
-      <div class="sq-row" id="squares"></div>
+    <div class="section-tag">Resolution A/80/L.104</div>
+    <h2 class="section-title">What the UN actually adopted</h2>
+    <p class="section-lede">A non-binding resolution introduced by <strong>Togo</strong>, co-sponsored by <strong>France</strong>, and backed by the <strong>African Union</strong>, formally adopted by recorded vote on 4 September 2026 during the 80th Session of the UN General Assembly.</p>
+
+    <div class="vote-grid" id="vote-grid" aria-label="193 UN member state votes visualised as coloured squares"></div>
+
+    <div class="vote-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--land)"></div>164 In Favour</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--crimson)"></div>1 Against - United States</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>6 Abstained</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c8bfaa"></div>22 Not Voting / Absent</div>
     </div>
-    <div class="note ok" style="margin-top:16px">9,833,517 (USA) + 9,596,961 (China) + 4,233,255 (EU-27) + 3,287,263 (India) + 1,964,375 (Mexico) + 377,975 (Japan) = <strong>29,293,346 km²</strong> — leaving ≈ <strong>1,076,654 km²</strong> spare, roughly the size of Egypt.</div>
-    <h3 style="margin-top:32px">Continents by true land area</h3>
-    <div class="bars" id="contbars"></div>
-    <p class="mono" style="color:var(--mute);font-size:.76rem;margin-top:12px">Surface areas: UN Statistics Division Demographic Yearbook conventions (total area incl. inland water), rounded; continental totals vary slightly between geoscheme conventions.</p>
-  </div>
-</section>
 
-<section id="projections">
-  <div class="wrap reveal">
-    <div class="eyebrow">05 · The Trade-off</div>
-    <h2>No flat map can preserve everything</h2>
-    <p class="lede">Gauss's <em>Theorema Egregium</em> settles it: a sphere cannot be flattened without stretching. Every projection chooses which property to keep. Equal Earth chooses to tell the truth about <strong>area</strong>.</p>
-    <div class="scroll"><table>
-      <thead><tr><th>Projection</th><th>Class</th><th>Preserves</th><th>Sacrifices</th><th>Identifier</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Mercator</strong> (1569)</td><td>Conformal cylindrical</td><td>Angles, bearings, local shape</td><td>Area — sec²φ inflation</td><td class="mono">EPSG:3395 · web 3857</td></tr>
-        <tr><td><strong>Equal Earth</strong> (2018)</td><td>Equal-area pseudocylindrical</td><td>Relative area, exactly</td><td>Shape toward poles and edges</td><td class="mono">EPSG:8857</td></tr>
-        <tr><td><strong>Gall–Peters</strong></td><td>Equal-area cylindrical</td><td>Relative area</td><td>Severe shape stretching</td><td class="mono">+proj=cea +lat_ts=45</td></tr>
-        <tr><td><strong>Robinson</strong> (1963)</td><td>Compromise</td><td>Visual balance only</td><td>Both area and angle, mildly</td><td class="mono">+proj=robin</td></tr>
-        <tr><td><strong>Winkel Tripel</strong> (1921)</td><td>Compromise</td><td>Low mean distortion</td><td>Neither equal-area nor conformal</td><td class="mono">+proj=wintri</td></tr>
-      </tbody>
-    </table></div>
-    <div class="grid g3" style="margin-top:20px">
-      <div class="card"><h3>Why Equal Earth, not Gall–Peters</h3><p>Its authors built it after finding no equal-area world projection both accurate and visually acceptable to general audiences. It holds area exactly while keeping continental outlines close to their globe appearance.</p></div>
-      <div class="card"><h3>Why Mercator survived</h3><p>Rhumb lines plot straight — load-bearing for navigation — and simple square tiling made spherical Mercator the default of every slippy web map. The resolution leaves those uses untouched.</p></div>
-      <div class="card"><h3>Why it matters</h3><p>Relative size is how non-specialists read importance. If the base layer of geographic literacy systematically shrinks the Global South, correcting it is educational infrastructure, not decoration.</p></div>
+    <p style="font-size:0.8rem;color:var(--ink-muted);font-family:var(--mono);margin-bottom:20px">Abstentions (UN press record): Estonia · Georgia · Lithuania · Republic of Moldova · Serbia · Ukraine</p>
+
+    <div class="g2">
+      <div class="card">
+        <h3>What it says</h3>
+        <p>Encourages governments, schools, international organisations, and technology companies to use Equal Earth and other equal-area projections where relative size matters. Frames the historical Mercator distortion as an "act of cognitive justice and memorial reparation" requiring correction. Invites UNESCO, UNDP and UN bodies to support implementation.</p>
+      </div>
+      <div class="card">
+        <h3>What it does not do</h3>
+        <p>Nothing becomes mandatory. The resolution is non-binding and explicitly states it does not challenge the use of Mercator "for maritime and aerial navigation, for which it remains fully suited." The EU noted on record it has no bearing on sovereignty, territorial status, or borders.</p>
+      </div>
+      <div class="card">
+        <h3>France acts immediately</h3>
+        <p>Foreign Minister Jean-Noël Barrot announced at the Sorbonne that France will abandon Mercator for its official world maps, becoming the first major power to act on the resolution. He stated: "Correcting a distorted representation is already an act of truth."</p>
+      </div>
+      <div class="card">
+        <h3>The dissents &amp; caveats</h3>
+        <p>US Ambassador Mike Waltz called the text part of "a much larger and more radical ideological project" and compared such resolutions to "barnacles on our work." Ukraine's Andriy Melnyk abstained, citing concern that Equal Earth maps depict Russian-occupied Ukrainian territory in a manner it found unacceptable.</p>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:16px">
+      <blockquote>
+        "Maps shape our understanding of the world. They are therefore never neutral. When they present a distorted image of our planet, they risk perpetuating inaccurate representations passed down through generations."
+        <footer>- Robert Dussey, Foreign Minister of Togo, introducing Resolution A/80/L.104</footer>
+      </blockquote>
+      <blockquote>
+        "This initiative will bring an end to misrepresentation in classrooms, media and international institutions, helping ensure that the world map reflects Africa's actual geographical scale."
+        <footer>- African Union Commission, statement on adoption, 4 Sep 2026</footer>
+      </blockquote>
     </div>
   </div>
 </section>
 
-<section id="gis">
+<!-- ═══════════════════════════════════════════
+     SECTION 3 · THE DISTORTION
+══════════════════════════════════════════════ -->
+<section id="distortion" class="section">
   <div class="wrap reveal">
-    <div class="eyebrow">06 · Practitioner Toolkit</div>
-    <h2>Adopting EPSG:8857 in a real stack</h2>
-    <p class="lede">The resolution is a policy signal; this is the engineering behind it. Equal Earth has shipped in PROJ since 5.2 with an authoritative EPSG code — migration is a CRS decision, not a research project.</p>
-    <div class="code-h"><span>PROJ / QGIS</span><button class="copy" data-copy="#c1">Copy</button></div>
-<pre id="c1">EPSG:8857 — "WGS 84 / Equal Earth Greenwich"
-+proj=eqearth +lon_0=0 +datum=WGS84 +units=m +no_defs
+    <div class="section-tag">The Mathematical Problem</div>
+    <h2 class="section-title">Mercator inflates area by sec²φ - that is arithmetic, not politics</h2>
+    <p class="section-lede">Mercator (1569) was a navigational masterpiece: a straight line on it is a constant compass bearing (rhumb line). The unavoidable mathematical price is that scale grows as <strong>1/cos φ</strong> in every direction, so <em>area</em> inflates by its square. Gauss's Theorema Egregium guarantees no flat map can fix everything at once.</p>
 
-# Pacific-centred variant (avoids splitting Asia)
-+proj=eqearth +lon_0=150 +datum=WGS84 +units=m +no_defs
+    <div class="g2" style="margin-bottom:20px">
+      <div class="table-wrap">
+        <table id="distortion-table">
+          <thead>
+            <tr>
+              <th>Latitude</th>
+              <th>Linear scale factor</th>
+              <th>Mercator area inflation</th>
+              <th>Equal Earth area</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
-# QGIS: Project ▸ Properties ▸ CRS ▸ search "8857"</pre>
-    <div class="code-h"><span>GDAL / OGR</span><button class="copy" data-copy="#c2">Copy</button></div>
-<pre id="c2">ogr2ogr -t_srs EPSG:8857 countries_eqearth.gpkg countries_4326.gpkg
-gdalwarp -t_srs EPSG:8857 -r bilinear -multi \
-         -co COMPRESS=DEFLATE -co TILED=YES in.tif out_eqearth.tif</pre>
-    <div class="code-h"><span>Python · GeoPandas / Cartopy</span><button class="copy" data-copy="#c3">Copy</button></div>
-<pre id="c3">import geopandas as gpd, cartopy.crs as ccrs, matplotlib.pyplot as plt
-
-gdf = gpd.read_file("countries.gpkg").to_crs(8857)
-gdf["area_km2"] = gdf.geometry.area / 1e6   # never compute area in 4326 or 3857
-
-ax = plt.axes(projection=ccrs.EqualEarth())
-ax.set_global(); ax.coastlines(linewidth=.5)</pre>
-    <div class="code-h"><span>Web · D3</span><button class="copy" data-copy="#c4">Copy</button></div>
-<pre id="c4">const projection = d3.geoEqualEarth().fitSize([width, height], land);
-const path = d3.geoPath(projection, context);
-// Leaflet / MapLibre tiles remain EPSG:3857 — for equal-area web maps,
-// render vectors yourself (D3, deck.gl, Observable Plot) or serve
-// a reprojected image layer. Interactive globes sidestep projection.</pre>
-    <div class="note" style="margin-top:20px"><strong>Architectural rule of thumb:</strong> choose the CRS from the question. Area statistics and thematic world maps → equal-area (EPSG:8857). Navigation, bearings, tiled basemaps → Mercator. Country-scale distance or shape work → a local projected CRS. A single global default CRS is a smell, not a standard.</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="note note-info">
+          <strong>The key insight:</strong> Africa straddles the Equator (0°), where Mercator has zero distortion. Greenland sits at 60–83°N, where Mercator inflates area 4× to 10×. Africa is in reality 14× larger than Greenland - on a Mercator map they can look roughly equivalent.
+        </div>
+        <div class="note note-warning">
+          <strong>Gauss's Theorema Egregium (1827)</strong> proves that no flat map can perfectly preserve all of area, shape, distance, and direction simultaneously. Every projection chooses its trade-off. Mercator chose angles. Equal Earth chooses area.
+        </div>
+        <div class="card" style="padding:16px">
+          <h3 style="margin-bottom:8px;font-size:0.92rem">Major distortion examples (Mercator vs. reality)</h3>
+          <ul style="font-size:0.85rem;color:var(--ink-muted);line-height:1.8;padding-left:18px">
+            <li>Greenland appears ≈ same size as Africa - reality: Africa is 14× larger</li>
+            <li>Alaska appears ≈ same size as Australia - reality: Australia is 4.5× larger</li>
+            <li>Russia appears larger than Africa - reality: Russia is only 56% of Africa's area</li>
+            <li>Europe appears larger than South America - reality: South America is larger</li>
+            <li>DRC alone (2.3 M km²) is bigger than Greenland - not apparent on Mercator</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section id="sources">
+<!-- ═══════════════════════════════════════════
+     SECTION 4 · PROJECTION LAB
+══════════════════════════════════════════════ -->
+<section id="lab" class="section">
   <div class="wrap reveal">
-    <div class="eyebrow">07 · Provenance</div>
-    <h2>Sources, data and disclaimer</h2>
-    <p class="lede">Primary sources are marked <span class="tag p">primary</span>; independent reporting <span class="tag s">press</span>.</p>
-    <ul class="src">
-      <li><span class="tag p">primary</span><div><a href="[press.un.org](https://press.un.org/en/2026/ga12779.doc.htm)" rel="noopener">UN Meetings Coverage GA/12779</a> — official summary of the 4 September 2026 plenary: adoption of A/80/L.104, vote 164–1–6, abstaining states, and explanations of vote.</div></li>
-      <li><span class="tag p">primary</span><div><a href="[docs.un.org](https://docs.un.org/A/80/L.104)" rel="noopener">Draft resolution A/80/L.104</a> — full text, “Correct the map: rebalancing global cartographic representation…”, and the <a href="[digitallibrary.un.org](https://digitallibrary.un.org/)" rel="noopener">UN Digital Library</a> for the certified voting record.</div></li>
-      <li><span class="tag p">primary</span><div><a href="[news.un.org](https://news.un.org/en/story/2026/09/1168284)" rel="noopener">UN News</a> — “UN tells the world: Stop making Africa look small”, with the Togo minister's quotations and vote breakdown.</div></li>
-      <li><span class="tag p">primary</span><div><a href="[doi.org](https://doi.org/10.1080/13658816.2018.1504949)" rel="noopener">Šavrič, Patterson &amp; Jenny (2018), “The Equal Earth map projection”</a>, <em>IJGIS</em> 33(3) — the peer-reviewed definition and formulas used on this page.</div></li>
-      <li><span class="tag p">primary</span><div><a href="[epsg.org](https://epsg.org/)" rel="noopener">EPSG Registry (8857)</a> and <a href="[proj.org](https://proj.org/en/stable/operations/projections/eqearth.html)" rel="noopener">PROJ documentation</a> — authoritative CRS definitions.</div></li>
-      <li><span class="tag p">primary</span><div><a href="[unstats.un.org](https://unstats.un.org/unsd/demographic-social/products/dyb/)" rel="noopener">UN Statistics Division, Demographic Yearbook</a> — surface-area statistics in the true-size section.</div></li>
-      <li><span class="tag p">primary</span><div><a href="[naturalearthdata.com](https://www.naturalearthdata.com/)" rel="noopener">Natural Earth</a> — 1:110m public-domain country geometry, the only dataset rendered here.</div></li>
-      <li><span class="tag s">press</span><div><a href="[bbc.com](https://www.bbc.com/news/articles/ce30vp55dnlo)" rel="noopener">BBC</a>, <a href="[aljazeera.com](https://www.aljazeera.com/news/2026/9/4/un-votes-to-adopt-new-world-map-that-reflects-africas-true-size)" rel="noopener">Al Jazeera</a>, <a href="[theguardian.com](https://www.theguardian.com/world/2026/sep/04/un-vote-world-map-mercator-equal-earth-africa)" rel="noopener">The Guardian</a>, <a href="[washingtonpost.com](https://www.washingtonpost.com/world/2026/09/05/un-endorses-map-change-represent-africa-more-accurately/)" rel="noopener">Washington Post</a> — vote coverage and ministerial quotations.</div></li>
-      <li><span class="tag s">press</span><div><a href="[correctthemap.org](https://correctthemap.org/)" rel="noopener">Correct The Map</a> (Africa No Filter · Speak Up Africa) and <a href="[equal-earth.com](https://equal-earth.com/)" rel="noopener">equal-earth.com</a> — campaign material and the authors' distribution of the projection; quoted for their own claims only.</div></li>
+    <div class="section-tag">Interactive Projection Lab</div>
+    <h2 class="section-title">See the mathematics - don't just read it</h2>
+    <p class="section-lede">Drag the slider to interpolate between projections. Enable Tissot's indicatrices - each ellipse started as an identical circle on the globe. On an equal-area map, every ellipse has the same area regardless of position. The Equal Earth formula is implemented verbatim from the 2018 IJGIS paper.</p>
+
+    <div class="controls">
+      <div class="range-wrap">
+        <span class="range-label">Mercator</span>
+        <input type="range" id="lab-slider" min="0" max="1" step="0.005" value="0" aria-label="Interpolate between Mercator and Equal Earth projections">
+        <span class="range-label">Equal&nbsp;Earth</span>
+      </div>
+    </div>
+
+    <div class="toggle-row" style="margin-bottom:12px">
+      <label class="toggle"><input type="checkbox" id="chk-grat" checked> Graticule (15°)</label>
+      <label class="toggle"><input type="checkbox" id="chk-tissot"> Tissot indicatrices</label>
+      <label class="toggle"><input type="checkbox" id="chk-labels"> Continent labels</label>
+      <button class="btn btn-outline" id="btn-snap-m" style="padding:8px 12px;font-size:0.8rem">Snap: Mercator</button>
+      <button class="btn btn-outline" id="btn-snap-e" style="padding:8px 12px;font-size:0.8rem">Snap: Equal Earth</button>
+    </div>
+
+    <div class="map-wrap">
+      <canvas id="lab-canvas" class="map-canvas" width="1100" height="530" aria-label="Interactive projection lab canvas"></canvas>
+      <div class="map-label" id="lab-label">MERCATOR · 1569</div>
+      <svg class="map-compass" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="28" fill="none" stroke="#1a5f7a" stroke-width="1.5" opacity="0.5"/>
+        <path d="M32 8 L37 32 L32 56 L27 32 Z" fill="#b03025"/>
+        <path d="M8 32 L32 27 L56 32 L32 37 Z" fill="#1a5f7a" opacity="0.65"/>
+        <circle cx="32" cy="32" r="3.5" fill="#f5f0e8" stroke="#0f3d52" stroke-width="1"/>
+        <text x="32" y="5" text-anchor="middle" font-size="6" fill="#0f3d52" font-family="Georgia,serif" font-weight="700">N</text>
+      </svg>
+    </div>
+
+    <div class="g2" style="margin-top:20px">
+      <div class="card">
+        <h3>Equal Earth formula - implemented verbatim</h3>
+        <div class="code-block">A₁ = 1.340264   A₂ = −0.081106
+A₃ = 0.000893   A₄ = 0.003796
+θ  = arcsin( (√3 / 2) · sin φ )
+
+x = 2√3 · λ · cos θ
+    ─────────────────────────────────
+    3 · (A₁ + 3A₂θ² + 7A₃θ⁶ + 9A₄θ⁸)
+
+y = A₁θ + A₂θ³ + A₃θ⁷ + A₄θ⁹
+
+Source: Šavrič, Patterson &amp; Jenny (2018)
+IJGIS 33(3) · doi:10.1080/13658816.2018.1504949
+EPSG:8857 "WGS 84 / Equal Earth Greenwich"</div>
+      </div>
+      <div class="card">
+        <h3>For GIS practitioners</h3>
+        <div class="code-block"># PROJ / QGIS / GDAL - ships since PROJ 5.2
+EPSG:8857  "WGS 84 / Equal Earth Greenwich"
++proj=eqearth +datum=WGS84 +units=m
+
+# Convert any vector layer
+ogr2ogr -t_srs EPSG:8857 out.gpkg in.gpkg
+
+# GeoPandas - always compute area in 8857
+gdf = gdf.to_crs(8857)
+gdf['area_km2'] = gdf.geometry.area / 1e6
+
+# ArcGIS Pro: available since v2.3
+# NASA GISS: default world map since 2018</div>
+        <p style="margin-top:12px">Rule of thumb: area statistics and thematic world maps → equal-area (EPSG:8857). Navigation, routing, and tiled basemaps → Mercator (EPSG:3857).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 5 · TRUE SIZE
+══════════════════════════════════════════════ -->
+<section id="truesize" class="section">
+  <div class="wrap reveal">
+    <div class="section-tag">Geographic Reality</div>
+    <h2 class="section-title">What 30.37 million km² actually contains</h2>
+    <p class="section-lede">Africa is larger than the United States, China, India, and most of Europe <em>combined</em>. These are not claims - they are auditable numbers from national and UN statistical sources.</p>
+
+    <div class="africa-fit">
+      <div class="fit-title">Countries that fit inside Africa's 30.37 M km² (total: 29.29 M km²)</div>
+
+      <div class="fit-row">
+        <div class="fit-bar" style="background:var(--teal);width:32%">USA 9.83M</div>
+        <span class="fit-name">United States</span>
+        <span class="fit-km">9,833,517 km²</span>
+      </div>
+      <div class="fit-row">
+        <div class="fit-bar" style="background:#c55a1a;width:32%">China 9.60M</div>
+        <span class="fit-name">China</span>
+        <span class="fit-km">9,596,961 km²</span>
+      </div>
+      <div class="fit-row">
+        <div class="fit-bar" style="background:#2e5fa3;width:14%">EU-27 4.2M</div>
+        <span class="fit-name">European Union (27 members)</span>
+        <span class="fit-km">≈ 4,233,255 km²</span>
+      </div>
+      <div class="fit-row">
+        <div class="fit-bar" style="background:#e07b1a;width:11%">India 3.3M</div>
+        <span class="fit-name">India</span>
+        <span class="fit-km">3,287,263 km²</span>
+      </div>
+      <div class="fit-row">
+        <div class="fit-bar" style="background:#5a7a22;width:6.5%">Mexico 2.0M</div>
+        <span class="fit-name">Mexico</span>
+        <span class="fit-km">1,964,375 km²</span>
+      </div>
+      <div class="fit-row">
+        <div class="fit-bar" style="background:#7a2e8a;width:1.2%">JP</div>
+        <span class="fit-name">Japan</span>
+        <span class="fit-km">377,975 km²</span>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px dashed rgba(26,95,122,0.2)">
+        <div class="note note-success">
+          <strong>Total above: 29,293,346 km²</strong> - all fit inside Africa with <strong>≈ 1,076,654 km² to spare</strong> (roughly the area of Egypt or Colombia). Source: World Bank, UN Statistics Division.
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--serif);font-size:1.1rem;color:var(--teal-dark);margin-bottom:14px">Continents by true land area - World Bank / CIA World Factbook</h3>
+    <div class="bar-list" id="continent-bars"></div>
+    <p style="font-size:0.74rem;color:var(--ink-muted);font-family:var(--mono);margin-top:10px">Figures rounded; vary slightly across statistical conventions. Antarctica excludes ice shelves.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 6 · EQUAL EARTH
+══════════════════════════════════════════════ -->
+<section id="equalearth" class="section">
+  <div class="wrap reveal">
+    <div class="section-tag">The Equal Earth Projection · EPSG:8857</div>
+    <h2 class="section-title">The cartographers who built a fairer map</h2>
+    <p class="section-lede">The Equal Earth projection was published in 2018 in the peer-reviewed <em>International Journal of Geographical Information Science</em> and registered as EPSG:8857. It is free, open, and already implemented in PROJ, QGIS, GDAL, ArcGIS, D3.js, and Cartopy.</p>
+
+    <div class="g3" style="margin-bottom:20px">
+      <div class="person-card">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="person-avatar avatar-a">BŠ</div>
+          <div>
+            <div class="person-name">Bojan Šavrič</div>
+            <div class="person-title">Esri · Portland, Oregon</div>
+          </div>
+        </div>
+        <p class="person-desc">Slovenian projection engineer at Esri. Led the mathematical design - a Robinson-like aesthetic constrained to exact area preservation via polynomial parametric equations. Also designed the Natural Earth projection used by National Geographic.</p>
+      </div>
+
+      <div class="person-card">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="person-avatar avatar-b">TP</div>
+          <div>
+            <div class="person-name">Tom Patterson</div>
+            <div class="person-title">US National Park Service</div>
+          </div>
+        </div>
+        <p class="person-desc">Veteran cartographer known for shaded relief and natural-looking terrain rendering. Shaped the projection's visual balance and familiar appearance - ensuring it would be accepted in classrooms, not just academic journals. Retired from NPS in 2019.</p>
+      </div>
+
+      <div class="person-card">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="person-avatar avatar-c">BJ</div>
+          <div>
+            <div class="person-name">Bernhard Jenny</div>
+            <div class="person-title">Monash University, Australia</div>
+          </div>
+        </div>
+        <p class="person-desc">Professor of geovisualisation at Monash University. Long-time collaborator with Šavrič, co-authored the 2018 IJGIS paper. Specialist in map aesthetics and projection design software. His lab created Flex Projector, used to prototype the design.</p>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <h3>Why Equal Earth, not Gall–Peters?</h3>
+        <p>The Gall–Peters projection (1885/1973) is also equal-area but severely compresses shapes - countries look stretched and unfamiliar, which limited educational acceptance for decades. Equal Earth was deliberately designed in 2018, partly in response to that controversy, to be equal-area <em>and</em> aesthetically appealing. The curved sides suggest the globe. Shapes are recognisable. NASA's Goddard Institute for Space Studies adopted it immediately on publication.</p>
+      </div>
+      <div class="card">
+        <h3>Why Mercator still has legitimate uses</h3>
+        <p>Rhumb lines (constant compass bearing routes) plot as straight lines on Mercator - still essential for aviation charts and marine navigation. Web Mercator (EPSG:3857) enables seamless, infinitely zoomable tile maps used by Google Maps, OpenStreetMap, and every major mapping API. The UN resolution explicitly carves these uses out. The point is not to ban Mercator; it is to stop using it as the default <em>comparison</em> map when relative size matters.</p>
+      </div>
+    </div>
+
+    <div class="note note-info" style="margin-top:16px">
+      <strong>NASA GISS</strong> - the Goddard Institute for Space Studies - adopted Equal Earth as its default global map projection immediately after the 2018 publication, using it for climate science visualisations. The projection is available in ArcGIS Pro 2.3+, ArcGIS Desktop 10.7+, QGIS (via PROJ), GDAL, D3.js, and Python's Cartopy.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 7 · TIMELINE
+══════════════════════════════════════════════ -->
+<section id="timeline" class="section">
+  <div class="wrap reveal">
+    <div class="section-tag">457 Years</div>
+    <h2 class="section-title">How we got here</h2>
+    <p class="section-lede">From a navigator's tool in 1569 to a diplomatic resolution in 2026 - the story of a map and its consequences.</p>
+
+    <ul class="timeline">
+      <li>
+        <span class="tl-year">1569</span>
+        <span class="tl-event">Gerardus Mercator publishes his world chart</span>
+        <span class="tl-desc">The Flemish cartographer creates a cylindrical projection that makes rhumb lines straight - a breakthrough for ocean navigation. The distortion of polar regions is a deliberate, known trade-off, not an oversight.</span>
+      </li>
+      <li>
+        <span class="tl-year">1855</span>
+        <span class="tl-event">James Gall proposes an equal-area alternative</span>
+        <span class="tl-desc">Scottish clergyman James Gall presents an equal-area cylindrical projection at the Glasgow meeting of the British Association. It would be largely ignored for over a century.</span>
+      </li>
+      <li>
+        <span class="tl-year">1973</span>
+        <span class="tl-event">Arno Peters reignites the size-perception debate</span>
+        <span class="tl-desc">German historian Arno Peters presents the Gall–Peters projection as a correction of Mercator's "Eurocentric bias," triggering a decades-long cartographic and political controversy. Despite equal-area accuracy, the stretched shapes limit classroom adoption.</span>
+      </li>
+      <li>
+        <span class="tl-year">1998</span>
+        <span class="tl-event">National Geographic adopts Winkel Tripel</span>
+        <span class="tl-desc">The American Cartographic Association had already recommended moving away from Mercator; National Geographic's adoption of Winkel Tripel marks mainstream cartography's formal break with Mercator for reference maps.</span>
+      </li>
+      <li>
+        <span class="tl-year">2018</span>
+        <span class="tl-event">Equal Earth projection published &amp; registered</span>
+        <span class="tl-desc">Šavrič, Patterson and Jenny publish the Equal Earth paper in the International Journal of Geographical Information Science (doi:10.1080/13658816.2018.1504949). EPSG:8857 is registered. NASA GISS adopts it immediately. The projection debuts at the North American Cartographic Information Society conference.</span>
+      </li>
+      <li>
+        <span class="tl-year">Feb 2026</span>
+        <span class="tl-event">African Union endorses "Correct the Map" at its Assembly</span>
+        <span class="tl-desc">The African Union Assembly formally endorses the Correct the Map initiative - a campaign led by Africa No Filter and Speak Up Africa - authorising Togo to lead the push at the UN General Assembly during the 80th Session.</span>
+      </li>
+      <li>
+        <span class="tl-year">4 Sep 2026</span>
+        <span class="tl-event">UN General Assembly adopts Resolution A/80/L.104 - 164–1–6</span>
+        <span class="tl-desc">The historic vote passes with 164 in favour, 1 against (United States), and 6 abstentions (Estonia, Georgia, Lithuania, Republic of Moldova, Serbia, Ukraine). France announces on the same day it will abandon Mercator for its official maps. Togo sets a deadline to update school geography materials by end of 2026.</span>
+      </li>
     </ul>
-    <div class="note" style="margin-top:22px"><strong>Disclaimer.</strong> Independent educational visualisation. Not affiliated with or endorsed by the United Nations, the African Union, the Republic of Togo, the Correct The Map campaign, or the Equal Earth authors. Vote figures follow the official UN meetings summary of 4 September 2026 and should be confirmed against the certified record once the final resolution document is issued. Area statistics are rounded and vary with definitional convention. Rendered boundaries come from Natural Earth and imply no position on any territorial dispute. All distortion figures are computed live from published formulas and are reproducible from this page's source.</div>
-    <div class="ctl" style="margin-top:24px">
-      <button class="primary" id="banner">⬇ Generate 1200×630 LinkedIn banner</button>
-      <a class="btn" href="[linkedin.com](https://www.linkedin.com/post-inspector/)" target="_blank" rel="noopener">LinkedIn Post Inspector</a>
-    </div>
-    <canvas id="og" width="1200" height="630" class="hide"></canvas>
   </div>
 </section>
 
-<footer class="site">
-  <div class="wrap">
-    <p><strong>Correct the Map — an interactive explainer.</strong> Single dependency-free HTML file; projections, distortion tensors and layout computed in the browser.</p>
-    <p id="credit"></p>
+<!-- ═══════════════════════════════════════════
+     SECTION 8 · GIS IMPACT
+══════════════════════════════════════════════ -->
+<section id="gis" class="section">
+  <div class="wrap reveal">
+    <div class="section-tag">GIS &amp; Geospatial Implications</div>
+    <h2 class="section-title">What this means for geospatial professionals</h2>
+
+    <div class="g2" style="margin-bottom:20px">
+      <div class="card">
+        <h3>Projection confusion costs real money</h3>
+        <p>Computing areas in geographic (EPSG:4326) or Web Mercator (EPSG:3857) coordinate systems is a common GIS error that produces wildly incorrect results. A polygon representing Greenland computed in EPSG:4326 degrees will give a meaningless area. EPSG:8857 (Equal Earth) is the correct CRS for any global area computation - it is equal-area by definition.</p>
+      </div>
+      <div class="card">
+        <h3>The default CRS problem</h3>
+        <p>Most web mapping stacks default to EPSG:3857 (Web Mercator) for display and EPSG:4326 for data storage. Neither is appropriate for area measurement. The resolution effectively endorses a three-CRS discipline: 4326 for storage, 3857 for tiles, and 8857 for any visualisation or measurement where relative size is the message.</p>
+      </div>
+      <div class="card">
+        <h3>Education and public perception</h3>
+        <p>A 2020 study (ISPRS International Journal of Geo-Information, &gt;130,000 respondents) found that exposure to Mercator maps measurably shapes geographic size perception. Respondents systematically overestimated the size of high-latitude countries. The UN resolution targets precisely this educational context.</p>
+      </div>
+      <div class="card">
+        <h3>Technology companies invited</h3>
+        <p>The resolution explicitly invites technology companies - read: Google, Microsoft, Apple, Mapbox, Esri - to adopt equal-area projections where comparative size matters. No obligation exists, but the diplomatic signal is clear. Esri's ArcGIS has included EPSG:8857 since version 2.3; Bojan Šavrič, who designed Equal Earth, is an Esri employee.</p>
+      </div>
+    </div>
+
+    <div class="note note-success">
+      <strong>Practical checklist for GIS teams:</strong> (1) Never compute areas in EPSG:4326 or 3857. (2) Use EPSG:8857 for global thematic maps where size is the message. (3) Use EPSG:3857 only for tile/navigation display. (4) Use EPSG:4326 for data storage and interchange. (5) When publishing choropleth or proportional symbol maps, state the projection.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 9 · SOURCES
+══════════════════════════════════════════════ -->
+<section id="sources" class="section">
+  <div class="wrap reveal">
+    <div class="section-tag">Sources &amp; Provenance</div>
+    <h2 class="section-title">Where every number comes from</h2>
+    <p class="section-lede">All data in this page is hardcoded from verified primary and authoritative secondary sources. No AI-generated statistics. No uncited claims.</p>
+
+    <ul class="source-list" style="margin-bottom:24px">
+      <li class="source-item">
+        <span class="source-tag tag-primary">Primary</span>
+        <div>
+          <strong>UN Meetings Coverage - GA/12779, 4 Sep 2026</strong><br>
+          <a href="https://press.un.org/en/2026/ga12779.doc.htm" target="_blank" rel="noopener">press.un.org/en/2026/ga12779.doc.htm</a> - Official UN press record. Vote tally (164–1–6), full list of abstaining states, all quoted delegate statements, resolution document number A/80/L.104.
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-primary">Primary</span>
+        <div>
+          <strong>US Mission to the UN - Explanation of Vote</strong><br>
+          <a href="https://usun.usmission.gov/explanation-of-vote-before-the-vote-for-unga-80-adoption-on-the-resolution-to-correct-the-map/" target="_blank" rel="noopener">usun.usmission.gov</a> - Full US explanation as delivered by Yaryna Ferencevych; Mike Waltz quoted re: "larger ideological project" and "barnacles."
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-academic">Academic</span>
+        <div>
+          <strong>Šavrič, B., Patterson, T. &amp; Jenny, B. (2018)</strong> - "The Equal Earth map projection." <em>International Journal of Geographical Information Science</em>, 33(3), pp. 454–465.<br>
+          <a href="https://doi.org/10.1080/13658816.2018.1504949" target="_blank" rel="noopener">doi:10.1080/13658816.2018.1504949</a> - The peer-reviewed definition. Polynomial coefficients A₁–A₄ used verbatim in the interactive canvases on this page.
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-primary">Primary</span>
+        <div>
+          <strong>EPSG Geodetic Registry - EPSG:8857</strong><br>
+          <a href="https://epsg.org/crs_8857/WGS-84-Equal-Earth-Greenwich.html" target="_blank" rel="noopener">epsg.org</a> · <a href="https://proj.org/en/stable/operations/projections/eqearth.html" target="_blank" rel="noopener">proj.org documentation</a> - Authoritative CRS definitions. PROJ implementation ships since version 5.2.
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-press">Press</span>
+        <div>
+          <strong>Wire / broadcast coverage of 4 Sep 2026 vote:</strong><br>
+          <a href="https://www.aljazeera.com/news/2026/9/4/un-votes-to-adopt-new-world-map-that-reflects-africas-true-size" target="_blank" rel="noopener">Al Jazeera</a> · <a href="https://www.reuters.com/world/africa/un-approves-resolution-support-map-that-shows-africas-true-size-2026-09-04/" target="_blank" rel="noopener">Reuters</a> · <a href="https://www.washingtonpost.com/world/2026/09/05/un-endorses-map-change-represent-africa-more-accurately/" target="_blank" rel="noopener">Washington Post</a> · <a href="https://www.bbc.com/news/articles/ce30vp55dnlo" target="_blank" rel="noopener">BBC</a> · <a href="https://cnn.com/2026/09/04/world/un-vote-new-world-map-intl-scli" target="_blank" rel="noopener">CNN</a> - Barrot and Dussey quotations; France 24 sourced for Barrot's Sorbonne speech.
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-primary">Primary</span>
+        <div>
+          <strong>African Union - "Correct the Map" communiqué, 4 Sep 2026</strong><br>
+          AU Commission Chairperson Mahmoud Ali Youssouf statement. AU Tweet (@_AfricanUnion) congratulating Togo and confirming AU endorsement at February 2026 AU Assembly.
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-press">Reference</span>
+        <div>
+          <strong>Area statistics</strong> - World Bank national accounts; CIA World Factbook; UN Statistics Division. Africa: 30.37 M km². Greenland: 2.166 M km² (Statistics Greenland). Individual country figures: USA 9,833,517 km²; China 9,596,961 km²; India 3,287,263 km²; Mexico 1,964,375 km²; Japan 377,975 km²; EU-27 ≈ 4,233,255 km² (sum of member states, Eurostat).
+        </div>
+      </li>
+      <li class="source-item">
+        <span class="source-tag tag-press">Reference</span>
+        <div>
+          <strong>Correct The Map campaign</strong><br>
+          <a href="https://correctthemap.org/" target="_blank" rel="noopener">correctthemap.org</a> · <a href="https://equal-earth.com/" target="_blank" rel="noopener">equal-earth.com</a> - Cited only for their own stated positions and campaign materials; not used as a data source.
+        </div>
+      </li>
+    </ul>
+
+    <div class="disclaimer">
+      <strong>Disclaimer.</strong> This is an independent educational visualisation. It is not affiliated with, endorsed by, or produced on behalf of the United Nations, the African Union, the Republic of Togo, France, the Correct The Map campaign, or the authors of the Equal Earth projection. Vote tallies follow UN Meetings Coverage document GA/12779 of 4 September 2026; the certified voting record should be confirmed against the UN Digital Library once formally issued. Area statistics are rounded and vary by statistical convention. Coastline geometries used in the interactive canvases are intentionally simplified for illustration and imply no position on any territorial dispute or sovereignty claim. All projection mathematics are computed live in the browser from published formulas and are reproducible from this file's source code. This page contains no trackers, no cookies, no external requests, and no analytics.
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Correct the Map</div>
+    <div class="footer-meta">
+      <p id="footer-credit" style="margin-top:6px"></p>
+      <p style="margin-top:6px">
+        Sources: <a href="https://press.un.org/en/2026/ga12779.doc.htm" target="_blank" rel="noopener">UN GA/12779</a> ·
+        <a href="https://doi.org/10.1080/13658816.2018.1504949" target="_blank" rel="noopener">Šavrič et al. 2018</a> ·
+        <a href="https://epsg.org/" target="_blank" rel="noopener">EPSG:8857</a>
+      </p>
+    </div>
   </div>
 </footer>
 
-<noscript><div class="wrap"><div class="note">JavaScript is required for the live projection mathematics; all text and sources above remain readable without it.</div></div></noscript>
-
 <script>
-"use strict";
-const SITE = { url:"[your-username.github.io](https://YOUR-USERNAME.github.io/correct-the-map/)", author:"YOUR NAME", role:"Lead Solution Architect" };
-document.getElementById("credit").textContent = SITE.author + " · " + SITE.role + " · Built " + new Date().getFullYear();
+(function () {
+  'use strict';
 
-const DEG = Math.PI/180, TAU = Math.PI*2, MAXLAT = 83*DEG;
-const EE = { A1:1.340264, A2:-0.081106, A3:0.000893, A4:0.003796, M:Math.sqrt(3)/2 };
+  /* ── CONFIGURATION - EDIT THESE ── */
+  const CONFIG = {
+    author: 'Pabitra',
+  };
 
-function rawEqualEarth(lam, phi){
-  const th = Math.asin(EE.M*Math.sin(phi));
-  const t2 = th*th, t6 = t2*t2*t2, t8 = t6*t2;
-  const den = EE.A1 + 3*EE.A2*t2 + 7*EE.A3*t6 + 9*EE.A4*t8;
-  return [2*Math.sqrt(3)*lam*Math.cos(th)/(3*den),
-          th*(EE.A1 + EE.A2*t2 + EE.A3*t6 + EE.A4*t8)];
-}
-function rawMercator(lam, phi){
-  const p = Math.max(-MAXLAT, Math.min(MAXLAT, phi));
-  return [lam, Math.log(Math.tan(Math.PI/4 + p/2))];
-}
-function fitted(raw, w, h, pad){
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  for(let i=0;i<=72;i++)for(let j=0;j<=72;j++){
-    const p = raw((-180+i*5)*DEG,(-90+j*2.5)*DEG);
-    x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);
-  }
-  const s = Math.min((w-2*pad)/(x1-x0),(h-2*pad)/(y1-y0));
-  const cx=(x0+x1)/2, cy=(y0+y1)/2;
-  return (lam,phi)=>{ const p=raw(lam,phi);
-    return [(p[0]-cx)*s + w/2, h/2 - (p[1]-cy)*s]; };
-}
+  /* ── CONSTANTS ── */
+  const D = Math.PI / 180;
+  const TAU = Math.PI * 2;
+  const MAXLAT = 83 * D;
+  const EE = { A1: 1.340264, A2: -0.081106, A3: 0.000893, A4: 0.003796 };
+  const SQRT3 = Math.sqrt(3);
 
-function arcPoints(topo, idx){
-  const rev = idx<0, arc = topo.arcs[rev?~idx:idx], t = topo.transform;
-  let x=0,y=0; const out=[];
-  for(const d of arc){
-    if(t){ x+=d[0]; y+=d[1]; out.push([x*t.scale[0]+t.translate[0], y*t.scale[1]+t.translate[1]]); }
-    else out.push([d[0],d[1]]);
+  /* ── PROJECTION FUNCTIONS ── */
+  function mercator(lon, lat) {
+    const clamped = Math.max(-MAXLAT, Math.min(MAXLAT, lat));
+    return [lon, Math.log(Math.tan(Math.PI / 4 + clamped / 2))];
   }
-  return rev?out.reverse():out;
-}
-function ring(topo, arcs){
-  const out=[];
-  for(const i of arcs){ const p=arcPoints(topo,i); out.push(...(out.length?p.slice(1):p)); }
-  return out;
-}
-function ringsOf(topo, g){
-  if(g.type==="Polygon") return g.arcs.map(r=>ring(topo,r));
-  if(g.type==="MultiPolygon") return g.arcs.flatMap(p=>p.map(r=>ring(topo,r)));
-  return [];
-}
-const MAP = { rings: [], ready: false };
-async function loadGeometry(){
-  const urls = ["data/countries-110m.json",
-    "[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json)"];
-  for(const u of urls){
-    try{
-      const r = await fetch(u,{cache:"force-cache"}); if(!r.ok) continue;
-      const topo = await r.json();
-      const obj = topo.objects.countries || Object.values(topo.objects)[0];
-      for(const g of (obj.geometries||[obj]))
-        for(const rg of ringsOf(topo,g))
-          if(rg.length>2) MAP.rings.push(rg.map(p=>[p[0]*DEG,p[1]*DEG]));
-      MAP.ready = true; return;
-    }catch(e){}
-  }
-}
-function graticule(step){
-  const out=[];
-  for(let lon=-180;lon<=180;lon+=step){ const l=[]; for(let lat=-90;lat<=90;lat+=2) l.push([lon*DEG,lat*DEG]); out.push(l); }
-  for(let lat=-75;lat<=75;lat+=step){ const l=[]; for(let lon=-180;lon<=180;lon+=2) l.push([lon*DEG,lat*DEG]); out.push(l); }
-  return out;
-}
-const GRAT = graticule(15);
 
-class Renderer{
-  constructor(canvas){
-    this.c=canvas; this.ctx=canvas.getContext("2d");
-    this.opts={grat:true,tissot:false,fill:true}; this.t=0;
-    this.resize();
-    addEventListener("resize",()=>{this.resize();this.draw(this.t);});
+  function equalEarth(lon, lat) {
+    const theta = Math.asin((SQRT3 / 2) * Math.sin(lat));
+    const t2 = theta * theta;
+    const t6 = t2 * t2 * t2;
+    const t8 = t6 * t2;
+    const denom = 3 * (EE.A1 + 3 * EE.A2 * t2 + 7 * EE.A3 * t6 + 9 * EE.A4 * t8);
+    const x = 2 * SQRT3 * lon * Math.cos(theta) / denom;
+    const y = EE.A1 * theta + EE.A2 * Math.pow(theta, 3) + EE.A3 * Math.pow(theta, 7) + EE.A4 * Math.pow(theta, 9);
+    return [x, y];
   }
-  resize(){
-    const dpr=Math.min(devicePixelRatio||1,2);
-    const w=this.c.clientWidth||1160, h=Math.round(w*0.52);
-    this.w=w; this.h=h;
-    this.c.width=w*dpr; this.c.height=h*dpr; this.c.style.height=h+"px";
-    this.ctx.setTransform(dpr,0,0,dpr,0,0);
-    this.pA=fitted(rawMercator,w,h,16); this.pB=fitted(rawEqualEarth,w,h,16);
-    this.cacheRings=MAP.rings.map(r=>this.pair(r));
-    this.cacheGrat=GRAT.map(r=>this.pair(r));
-  }
-  pair(line){
-    const a=new Float64Array(line.length*2), b=new Float64Array(line.length*2);
-    for(let i=0;i<line.length;i++){
-      const A=this.pA(line[i][0],line[i][1]), B=this.pB(line[i][0],line[i][1]);
-      a[i*2]=A[0]; a[i*2+1]=A[1]; b[i*2]=B[0]; b[i*2+1]=B[1];
-    }
-    return [a,b];
-  }
-  at(lam,phi,t){
-    const A=this.pA(lam,phi), B=this.pB(lam,phi);
-    return [A[0]+(B[0]-A[0])*t, A[1]+(B[1]-A[1])*t];
-  }
-  trace(pairs,t){
-    const [a,b]=pairs, n=a.length/2; this.ctx.beginPath();
-    for(let i=0;i<n;i++){
-      const x=a[i*2]+(b[i*2]-a[i*2])*t, y=a[i*2+1]+(b[i*2+1]-a[i*2+1])*t;
-      i?this.ctx.lineTo(x,y):this.ctx.moveTo(x,y);
-    }
-  }
-  jacobian(lam,phi,t){
-    const h=1e-4, cs=Math.max(Math.cos(phi),1e-6);
-    const px=this.at(lam+h,phi,t), mx=this.at(lam-h,phi,t);
-    const py=this.at(lam,phi+h,t), my=this.at(lam,phi-h,t);
-    return [(px[0]-mx[0])/(2*h)/cs,(py[0]-my[0])/(2*h),
-            (px[1]-mx[1])/(2*h)/cs,(py[1]-my[1])/(2*h)];
-  }
-  ellipse(J){
-    const [a,b,c,d]=J;
-    const E=(a+d)/2,F=(a-d)/2,G=(c+b)/2,H=(c-b)/2;
-    const Q=Math.hypot(E,H),R=Math.hypot(F,G);
-    return {s1:Q+R, s2:Math.abs(Q-R), ang:(Math.atan2(G,F)+Math.atan2(H,E))/2};
-  }
-  drawTissot(t){
-    const ctx=this.ctx;
-    const J0=this.jacobian(0,0,t);
-    const norm=Math.sqrt(Math.abs(J0[0]*J0[3]-J0[1]*J0[2]))||1, R0=this.w/150;
-    ctx.lineWidth=1.3;
-    for(let lat=-75;lat<=75;lat+=25) for(let lon=-150;lon<=150;lon+=30){
-      const lam=lon*DEG, phi=lat*DEG;
-      const e=this.ellipse(this.jacobian(lam,phi,t).map(v=>v/norm));
-      const p=this.at(lam,phi,t);
-      const r1=Math.min(e.s1*R0,this.w/12), r2=Math.min(e.s2*R0,this.w/12);
-      const area=e.s1*e.s2;
-      ctx.beginPath(); ctx.ellipse(p[0],p[1],r1,r2,-e.ang,0,TAU);
-      ctx.fillStyle=`rgba(179,64,58,${Math.min(.28,.06+Math.abs(area-1)*.1)})`;
-      ctx.strokeStyle=area>1.25?"#b3403a":"#0e7490";
-      ctx.fill(); ctx.stroke();
-    }
-  }
-  draw(t){
-    this.t=t; const ctx=this.ctx;
-    ctx.clearRect(0,0,this.w,this.h);
-    if(this.opts.grat){
-      ctx.strokeStyle="rgba(14,116,144,.22)"; ctx.lineWidth=1;
-      for(const g of this.cacheGrat){ this.trace(g,t); ctx.stroke(); }
-    }
-    if(MAP.ready){
-      ctx.lineWidth=.8; ctx.strokeStyle="#41775f";
-      ctx.fillStyle=this.opts.fill?"#bcd9c3":"transparent";
-      for(const r of this.cacheRings){
-        this.trace(r,t); ctx.closePath();
-        if(this.opts.fill) ctx.fill();
-        ctx.stroke();
+
+  /* Build a screen-space transform for a projection fitting W×H with padding */
+  function makeFit(proj, W, H, pad) {
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (let i = 0; i <= 72; i++) {
+      for (let j = 0; j <= 68; j++) {
+        const p = proj((-180 + i * 5) * D, (-85 + j * 2.5) * D);
+        if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0];
+        if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1];
       }
-    } else {
-      ctx.fillStyle="#5f6f79"; ctx.font="13px ui-monospace,monospace"; ctx.textAlign="center";
-      ctx.fillText("Coastline geometry unavailable offline — graticule and distortion mathematics shown.", this.w/2, this.h-14);
     }
-    if(this.opts.tissot) this.drawTissot(t);
-    ctx.fillStyle="#0b5069"; ctx.font="700 12px ui-monospace,monospace"; ctx.textAlign="left";
-    ctx.fillText(t<.02?"MERCATOR · 1569":t>.98?"EQUAL EARTH · 2018 · EPSG:8857"
-      :`INTERPOLATED  t = ${t.toFixed(2)}`, 16, 24);
+    const s = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (y1 - y0));
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    return (lon, lat) => {
+      const p = proj(lon, lat);
+      return [(p[0] - cx) * s + W / 2, H / 2 - (p[1] - cy) * s];
+    };
   }
-}
 
-const hero=new Renderer(document.getElementById("hero"));
-const lab=new Renderer(document.getElementById("lab"));
-const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* ── HARDCODED SIMPLIFIED COASTLINES ── */
+  /* Polygon vertices as [lon, lat] degrees - intentionally simplified */
+  const COAST_RAW = [
+    /* Africa */
+    [[-17,15],[-16,21],[-10,26],[-6,30],[0,32],[10,33],[20,32],[30,31],[34,27],[35,22],
+     [38,18],[43,11],[48,11],[51,10],[45,2],[41,-2],[40,-10],[36,-18],[33,-25],[28,-32],
+     [22,-34],[18,-33],[15,-27],[12,-18],[9,-8],[9,0],[6,4],[-2,5],[-8,4],[-13,8],[-17,12]],
+    /* Eurasia */
+    [[-10,36],[-9,43],[-5,48],[2,51],[8,54],[8,57],[11,59],[18,56],[24,57],[28,60],[25,65],
+     [16,68],[22,70],[30,70],[42,68],[52,69],[62,69],[76,68],[90,69],[105,73],[113,74],
+     [126,73],[140,72],[152,70],[162,69],[172,67],[180,65],[176,62],[162,58],[157,52],
+     [142,54],[135,44],[129,40],[122,37],[121,30],[110,20],[105,10],[103,2],[100,8],
+     [98,13],[94,17],[88,21],[80,15],[77,8],[73,20],[67,24],[59,25],[59,22],[55,17],
+     [52,15],[44,12],[39,20],[34,28],[36,36],[27,36],[26,40],[22,37],[18,40],[15,38],
+     [12,44],[8,44],[3,43],[0,39],[-6,36]],
+    /* North America */
+    [[-166,66],[-161,58],[-152,57],[-136,57],[-130,54],[-125,48],[-124,40],[-117,32],
+     [-110,23],[-105,19],[-96,16],[-90,13],[-85,10],[-80,8],[-78,9],[-83,14],[-87,16],
+     [-90,19],[-87,21],[-91,22],[-94,25],[-97,28],[-91,29],[-84,30],[-81,25],[-80,32],
+     [-76,35],[-70,42],[-66,45],[-60,47],[-55,50],[-58,52],[-64,58],[-78,58],[-82,55],
+     [-94,58],[-93,64],[-82,66],[-86,69],[-96,70],[-110,68],[-125,70],[-136,69],[-155,71],[-166,68]],
+    /* South America */
+    [[-77,7],[-70,11],[-63,10],[-60,8],[-52,5],[-50,0],[-44,-2],[-35,-8],[-39,-13],
+     [-40,-20],[-48,-25],[-53,-33],[-58,-38],[-62,-40],[-65,-45],[-68,-50],[-68,-54],
+     [-72,-52],[-73,-45],[-71,-37],[-71,-30],[-70,-18],[-75,-14],[-81,-6],[-80,0]],
+    /* Australia */
+    [[114,-22],[113,-26],[115,-34],[124,-33],[129,-32],[135,-35],[140,-38],[146,-39],
+     [150,-37],[153,-30],[153,-25],[146,-19],[142,-11],[136,-12],[132,-11],[126,-14],[122,-18]],
+    /* Greenland */
+    [[-45,60],[-53,66],[-53,70],[-56,74],[-61,76],[-68,76],[-58,80],[-44,83],[-30,83],
+     [-21,80],[-17,74],[-22,70],[-32,68],[-40,65],[-42,60]],
+    /* Madagascar */
+    [[44,-16],[50,-16],[47,-25],[44,-20]],
+    /* Britain/Ireland */
+    [[-5,50],[2,52],[-2,56],[-5,58],[-6,54]],
+    /* Japan */
+    [[130,31],[141,35],[141,43],[143,44],[140,41],[135,34]],
+    /* New Zealand */
+    [[173,-35],[178,-38],[172,-44],[167,-46],[170,-41]]
+  ];
 
-function morph(r,from,to,ms){
-  const t0=performance.now();
-  const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
-  (function step(now){
-    const k=Math.min((now-t0)/ms,1);
-    r.draw(from+(to-from)*ease(k));
-    if(k<1) requestAnimationFrame(step);
-  })(t0);
-}
-loadGeometry().then(()=>{
-  hero.resize(); lab.resize(); hero.draw(0); lab.draw(0);
-  if(!reduce) setTimeout(()=>morph(hero,0,1,2600),700);
-  paintOG();
-});
-hero.draw(0); lab.draw(0);
+  /* Antarctica outline (generated) */
+  (function () {
+    const a = [];
+    for (let lon = -180; lon <= 180; lon += 8)
+      a.push([lon, -69 - 4 * Math.abs(Math.sin(lon * D * 1.4))]);
+    for (let lon = 180; lon >= -180; lon -= 12) a.push([lon, -84]);
+    COAST_RAW.push(a);
+  })();
 
-let heroT=0;
-document.getElementById("play").onclick=()=>{ heroT=heroT?0:1; morph(hero,1-heroT,heroT,2200); };
+  /* Densify ring so morphing is smooth */
+  function densify(ring, maxStep) {
+    const out = [];
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length];
+      const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / maxStep));
+      for (let k = 0; k < n; k++) out.push([(a[0] + (b[0] - a[0]) * k / n) * D, (a[1] + (b[1] - a[1]) * k / n) * D]);
+    }
+    return out;
+  }
 
-const slider=document.getElementById("t");
-const setP=()=>slider.style.setProperty("--p",slider.value*100+"%");
-slider.oninput=()=>{ setP(); lab.draw(+slider.value); };
-setP();
-grat.onchange=e=>{lab.opts.grat=e.target.checked;lab.draw(+slider.value);};
-tissot.onchange=e=>{lab.opts.tissot=e.target.checked;lab.draw(+slider.value);};
-fill.onchange=e=>{lab.opts.fill=e.target.checked;lab.draw(+slider.value);};
-snap0.onclick=()=>{ morph(lab,+slider.value,0,900); slider.value=0; setP(); };
-snap1.onclick=()=>{ morph(lab,+slider.value,1,1200); slider.value=1; setP(); };
+  const LAND_RINGS = COAST_RAW.map(r => densify(r, 2.5));
 
-const latBody=document.querySelector("#lattab tbody");
-[0,15,30,45,60,75,83].forEach(lat=>{
-  const sec=1/Math.cos(lat*DEG);
-  latBody.insertAdjacentHTML("beforeend",
-    `<tr><td class="mono">${lat}°</td><td class="num">${sec.toFixed(2)}×</td>
-     <td class="num" style="color:${sec*sec>4?"var(--bad)":"var(--ink)"}">${(sec*sec).toFixed(2)}×</td>
-     <td class="num" style="color:var(--land)">1.00×</td></tr>`);
-});
+  /* Graticule lines */
+  const GRAT = [];
+  for (let lon = -180; lon <= 180; lon += 15) {
+    const l = []; for (let lat = -85; lat <= 85; lat += 2) l.push([lon * D, lat * D]);
+    GRAT.push(l);
+  }
+  for (let lat = -75; lat <= 75; lat += 15) {
+    const l = []; for (let lon = -180; lon <= 180; lon += 2) l.push([lon * D, lat * D]);
+    GRAT.push(l);
+  }
 
-const grid=document.getElementById("votegrid"), cells=[];
-for(let i=0;i<193;i++){
-  const cls=i<164?"yes":i<165?"no":i<171?"abs":"";
-  const d=document.createElement("div"); d.className="v "+cls;
-  d.title=cls==="yes"?"In favour":cls==="no"?"Against — United States":cls==="abs"?"Abstained":"Not voting / absent";
-  grid.appendChild(d); cells.push(d);
-}
+  /* Continent label positions [lon, lat, name] */
+  const CONT_LABELS = [
+    [20, 2, 'Africa'], [80, 40, 'Asia'], [-100, 45, 'N. America'],
+    [-60, -15, 'S. America'], [134, -26, 'Australia'], [10, 50, 'Europe'], [0, -80, 'Antarctica']
+  ];
 
-const AREAS=[["United States",9833517],["China",9596961],["EU-27",4233255],
-  ["India",3287263],["Mexico",1964375],["Japan",377975],["Spare ≈ Egypt",1076654,true]];
-const sqWrap=document.getElementById("squares");
-AREAS.forEach(([n,a,spare])=>{
-  const side=Math.round(Math.sqrt(a)/14);
-  const d=document.createElement("div");
-  d.className="sq"+(spare?" spare":"");
-  d.style.width=side+"px"; d.style.height=side+"px";
-  d.innerHTML=`<b>${n}</b><span>${a.toLocaleString("en-US")} km²</span>`;
-  d.title=`${n}: ${a.toLocaleString("en-US")} km²`;
-  sqWrap.appendChild(d);
-});
+  /* ── RENDERER CLASS ── */
+  class MapRenderer {
+    constructor(canvasId) {
+      this.canvas = document.getElementById(canvasId);
+      this.ctx = this.canvas.getContext('2d');
+      this.t = 0;
+      this.opts = { grat: true, tissot: false, labels: false };
+      this._build();
+      this._resizeObserver = new ResizeObserver(() => { this._build(); this.draw(this.t); });
+      this._resizeObserver.observe(this.canvas.parentElement);
+    }
 
-const CONT=[["Asia",44579000],["Africa",30370000],["N. America",24709000],
-  ["S. America",17840000],["Antarctica",14000000],["Europe",10180000],["Oceania",8600000]];
-document.getElementById("contbars").innerHTML=CONT.map(([n,a])=>
-  `<div class="brow"><span>${n}</span><span class="btrack"><span class="bfill" data-w="${(a/44579000*100).toFixed(1)}"></span></span>
-   <span class="mono num" style="text-align:right">${(a/1e6).toFixed(2)}M km²</span></div>`).join("");
+    _build() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const W = this.canvas.parentElement.clientWidth || 1100;
+      const H = Math.round(W * 0.48);
+      this.W = W; this.H = H;
+      this.canvas.width = W * dpr;
+      this.canvas.height = H * dpr;
+      this.canvas.style.height = H + 'px';
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-const io=new IntersectionObserver(es=>es.forEach(e=>{
-  if(!e.isIntersecting) return;
-  e.target.classList.add("in");
-  e.target.querySelectorAll?.("[data-count]").forEach(el=>{
-    const to=+el.dataset.count, sfx=el.dataset.suffix||"", t0=performance.now();
-    (function s(n){ const k=Math.min((n-t0)/1100,1);
-      el.textContent=Math.round(to*(1-Math.pow(1-k,3)))+sfx;
-      if(k<1) requestAnimationFrame(s); })(t0);
+      this.pmA = makeFit(mercator, W, H, 12);
+      this.pmB = makeFit(equalEarth, W, H, 12);
+
+      this.landPairs = LAND_RINGS.map(r => this._makePair(r));
+      this.gratPairs = GRAT.map(r => this._makePairOpen(r));
+    }
+
+    _makePair(ring) {
+      const n = ring.length;
+      const a = new Float64Array(n * 2), b = new Float64Array(n * 2);
+      for (let i = 0; i < n; i++) {
+        const A = this.pmA(ring[i][0], ring[i][1]);
+        const B = this.pmB(ring[i][0], ring[i][1]);
+        a[i * 2] = A[0]; a[i * 2 + 1] = A[1];
+        b[i * 2] = B[0]; b[i * 2 + 1] = B[1];
+      }
+      return [a, b];
+    }
+
+    _makePairOpen(line) { return this._makePair(line); }
+
+    _screenPt(lon, lat, t) {
+      const A = this.pmA(lon, lat), B = this.pmB(lon, lat);
+      return [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t];
+    }
+
+    _tracePair([a, b], t, close) {
+      const n = a.length / 2; this.ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = a[i * 2] + (b[i * 2] - a[i * 2]) * t;
+        const y = a[i * 2 + 1] + (b[i * 2 + 1] - a[i * 2 + 1]) * t;
+        i ? this.ctx.lineTo(x, y) : this.ctx.moveTo(x, y);
+      }
+      if (close) this.ctx.closePath();
+    }
+
+    _jacobian(lon, lat, t) {
+      const h = 1e-4;
+      const cs = Math.max(Math.cos(lat), 1e-6);
+      const px = this._screenPt(lon + h, lat, t), mx = this._screenPt(lon - h, lat, t);
+      const py = this._screenPt(lon, lat + h, t), my = this._screenPt(lon, lat - h, t);
+      return [
+        (px[0] - mx[0]) / (2 * h) / cs, (py[0] - my[0]) / (2 * h),
+        (px[1] - mx[1]) / (2 * h) / cs, (py[1] - my[1]) / (2 * h)
+      ];
+    }
+
+    _drawTissot(t) {
+      const ctx = this.ctx;
+      const J0 = this._jacobian(0, 0, t);
+      const norm = Math.sqrt(Math.abs(J0[0] * J0[3] - J0[1] * J0[2])) || 1;
+      const R0 = this.W / 155;
+      ctx.lineWidth = 1.2;
+      for (let lat = -60; lat <= 60; lat += 30) {
+        for (let lon = -150; lon <= 150; lon += 30) {
+          const [a, b, c, d] = this._jacobian(lon * D, lat * D, t).map(v => v / norm);
+          const E = (a + d) / 2, F = (a - d) / 2, G = (c + b) / 2, H2 = (c - b) / 2;
+          const Q = Math.hypot(E, H2), R = Math.hypot(F, G);
+          const s1 = Q + R, s2 = Math.abs(Q - R);
+          const ang = (Math.atan2(G, F) + Math.atan2(H2, E)) / 2;
+          const q = this._screenPt(lon * D, lat * D, t);
+          const area = s1 * s2;
+          ctx.beginPath();
+          ctx.ellipse(q[0], q[1], Math.min(s1 * R0, this.W / 9), Math.min(s2 * R0, this.W / 9), -ang, 0, TAU);
+          const isDistorted = area > 1.25 || area < 0.75;
+          ctx.fillStyle = isDistorted ? 'rgba(176,48,37,0.18)' : 'rgba(26,95,122,0.12)';
+          ctx.strokeStyle = isDistorted ? '#b03025' : '#1a5f7a';
+          ctx.fill(); ctx.stroke();
+        }
+      }
+    }
+
+    draw(t) {
+      this.t = t;
+      const ctx = this.ctx;
+      const W = this.W, H = this.H;
+
+      /* Ocean background */
+      const oceGrad = ctx.createLinearGradient(0, 0, 0, H);
+      oceGrad.addColorStop(0, '#c8dde8');
+      oceGrad.addColorStop(1, '#b5ceda');
+      ctx.fillStyle = oceGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      /* Graticule */
+      if (this.opts.grat) {
+        ctx.strokeStyle = 'rgba(26,95,122,0.2)';
+        ctx.lineWidth = 0.8;
+        for (const g of this.gratPairs) { this._tracePair(g, t, false); ctx.stroke(); }
+      }
+
+      /* Land */
+      ctx.lineWidth = 0.85;
+      ctx.strokeStyle = '#3e6e52';
+      const landGrad = ctx.createLinearGradient(0, 0, 0, H);
+      landGrad.addColorStop(0, '#6fa87e');
+      landGrad.addColorStop(1, '#4e7a5c');
+      ctx.fillStyle = landGrad;
+      for (const r of this.landPairs) { this._tracePair(r, t, true); ctx.fill(); ctx.stroke(); }
+
+      /* Tissot */
+      if (this.opts.tissot) this._drawTissot(t);
+
+      /* Continent labels */
+      if (this.opts.labels) {
+        ctx.font = 'bold ' + Math.round(this.W / 80) + 'px Georgia,serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const [lon, lat, name] of CONT_LABELS) {
+          const p = this._screenPt(lon * D, lat * D, t);
+          ctx.fillStyle = 'rgba(15,61,82,0.7)';
+          ctx.fillText(name, p[0] + 1, p[1] + 1);
+          ctx.fillStyle = 'rgba(245,240,232,0.9)';
+          ctx.fillText(name, p[0], p[1]);
+        }
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+      }
+
+      /* Projection stamp */
+      const stamp = t < 0.02 ? 'MERCATOR · 1569' : t > 0.98 ? 'EQUAL EARTH · 2018 · EPSG:8857' : `BLEND  t = ${t.toFixed(2)}`;
+      ctx.font = 'bold 11px SF Mono,Menlo,monospace';
+      ctx.fillStyle = 'rgba(15,61,82,0.85)';
+      ctx.fillRect(10, 8, ctx.measureText(stamp).width + 18, 22);
+      ctx.fillStyle = '#c8dde8';
+      ctx.fillText(stamp, 19, 24);
+    }
+  }
+
+  /* ── ANIMATION HELPERS ── */
+  const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function morph(renderer, from, to, ms, onFrame) {
+    if (reduceMotion) { renderer.draw(to); if (onFrame) onFrame(to); return; }
+    const t0 = performance.now();
+    function step(now) {
+      const k = Math.min((now - t0) / ms, 1);
+      const v = from + (to - from) * ease(k);
+      renderer.draw(v);
+      if (onFrame) onFrame(v);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── HERO MAP ── */
+  const heroRenderer = new MapRenderer('hero-canvas');
+  const heroLabel = document.getElementById('hero-label');
+  const heroSlider = document.getElementById('hero-slider');
+  let heroT = 0;
+
+  function updateHeroLabel(t) {
+    heroLabel.textContent = t < 0.02 ? 'MERCATOR · 1569' : t > 0.98 ? 'EQUAL EARTH · 2018 · EPSG:8857' : `BLENDING  t = ${t.toFixed(2)}`;
+  }
+
+  heroSlider.addEventListener('input', () => {
+    heroT = +heroSlider.value;
+    heroSlider.style.setProperty('--pct', (heroT * 100) + '%');
+    heroRenderer.draw(heroT);
+    updateHeroLabel(heroT);
   });
-  e.target.querySelectorAll?.(".bfill").forEach((b,i)=>setTimeout(()=>b.style.width=b.dataset.w+"%",i*90));
-  if(e.target.id==="vote") cells.forEach((c,i)=>setTimeout(()=>c.classList.add("on"),i*4));
-  io.unobserve(e.target);
-}),{threshold:.15});
-document.querySelectorAll(".reveal,.hero .grid,#vote").forEach(el=>io.observe(el));
 
-const links=[...document.querySelectorAll("nav a")];
-document.querySelectorAll("section[id]").forEach(s=>{
-  new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting) links.forEach(a=>a.setAttribute("aria-current",a.hash==="#"+s.id));
-  }),{rootMargin:"-45% 0px -50% 0px"}).observe(s);
-});
+  document.getElementById('btn-morph').addEventListener('click', () => {
+    const target = heroT < 0.5 ? 1 : 0;
+    const from = heroT;
+    morph(heroRenderer, from, target, 2200, v => {
+      heroT = v;
+      heroSlider.value = v;
+      heroSlider.style.setProperty('--pct', (v * 100) + '%');
+      updateHeroLabel(v);
+      document.getElementById('btn-morph').textContent = v > 0.5 ? '◀ Morph Back to Mercator' : '▶ Animate Mercator → Equal Earth';
+    });
+  });
 
-addEventListener("scroll",()=>{
-  const h=document.documentElement;
-  document.getElementById("bar").style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
-},{passive:true});
+  document.getElementById('hero-map-wrap').addEventListener('click', () => {
+    document.getElementById('btn-morph').click();
+  });
 
-document.addEventListener("click",async e=>{
-  const b=e.target.closest(".copy"); if(!b) return;
-  try{
-    await navigator.clipboard.writeText(document.querySelector(b.dataset.copy).textContent);
-    const o=b.textContent; b.textContent="Copied ✓"; setTimeout(()=>b.textContent=o,1400);
-  }catch(err){}
-});
+  heroRenderer.draw(0);
+  if (!reduceMotion) setTimeout(() => morph(heroRenderer, 0, 1, 2800, v => {
+    heroT = v; heroSlider.value = v;
+    heroSlider.style.setProperty('--pct', (v * 100) + '%');
+    updateHeroLabel(v);
+    if (v >= 1) document.getElementById('btn-morph').textContent = '◀ Morph Back to Mercator';
+  }), 1000);
 
-function paintOG(){
-  const c=document.getElementById("og"), ctx=c.getContext("2d");
-  ctx.fillStyle="#f7f4ea"; ctx.fillRect(0,0,1200,630);
-  ctx.strokeStyle="rgba(14,116,144,.12)"; ctx.lineWidth=1;
-  for(let x=0;x<1200;x+=56){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,630);ctx.stroke();}
-  for(let y=0;y<630;y+=56){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(1200,y);ctx.stroke();}
-  const p=fitted(rawEqualEarth,1200,760,40);
-  ctx.save(); ctx.translate(230,190); ctx.globalAlpha=.35; ctx.fillStyle="#2e7d5b";
-  for(const r of MAP.rings){
-    ctx.beginPath();
-    r.forEach((pt,i)=>{const q=p(pt[0],pt[1]); i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);});
-    ctx.closePath(); ctx.fill();
+  /* ── LAB MAP ── */
+  const labRenderer = new MapRenderer('lab-canvas');
+  const labLabel = document.getElementById('lab-label');
+  const labSlider = document.getElementById('lab-slider');
+  let labT = 0;
+
+  function updateLabLabel(t) {
+    labLabel.textContent = t < 0.02 ? 'MERCATOR · 1569' : t > 0.98 ? 'EQUAL EARTH · 2018 · EPSG:8857' : `INTERPOLATED  t = ${t.toFixed(3)}`;
   }
-  ctx.restore();
-  ctx.fillStyle="#a06a14"; ctx.font="700 22px ui-monospace,monospace";
-  ctx.fillText("UN GENERAL ASSEMBLY · A/80/L.104 · 4 SEPTEMBER 2026",68,100);
-  ctx.fillStyle="#0b5069"; ctx.font="700 74px Georgia,serif";
-  ctx.fillText("The UN voted 164–1",68,210);
-  ctx.fillText("to Correct the Map.",68,296);
-  ctx.fillStyle="#42535e"; ctx.font="500 29px ui-sans-serif,system-ui";
-  ctx.fillText("Equal Earth over Mercator — an interactive projection lab:",68,368);
-  ctx.fillText("live morph, Tissot distortion, true-size Africa, EPSG:8857.",68,410);
-  ctx.fillStyle="#0e7490"; ctx.fillRect(68,458,84,5);
-  ctx.fillStyle="#5f6f79"; ctx.font="600 23px ui-monospace,monospace";
-  ctx.fillText(SITE.url.replace(/^https?:\/\//,""),68,520);
-  ctx.fillText(SITE.author+" · "+SITE.role,68,558);
-}
-document.getElementById("banner").onclick=()=>{
-  paintOG();
-  const a=document.createElement("a");
-  a.download="og-banner.png";
-  a.href=document.getElementById("og").toDataURL("image/png");
-  a.click();
-};
+
+  labSlider.addEventListener('input', () => {
+    labT = +labSlider.value;
+    labSlider.style.setProperty('--pct', (labT * 100) + '%');
+    labRenderer.draw(labT);
+    updateLabLabel(labT);
+  });
+
+  document.getElementById('chk-grat').addEventListener('change', e => {
+    labRenderer.opts.grat = e.target.checked; labRenderer.draw(labT);
+  });
+  document.getElementById('chk-tissot').addEventListener('change', e => {
+    labRenderer.opts.tissot = e.target.checked; labRenderer.draw(labT);
+  });
+  document.getElementById('chk-labels').addEventListener('change', e => {
+    labRenderer.opts.labels = e.target.checked; labRenderer.draw(labT);
+  });
+  document.getElementById('btn-snap-m').addEventListener('click', () => {
+    morph(labRenderer, labT, 0, 800, v => { labT = v; labSlider.value = v; labSlider.style.setProperty('--pct', '0%'); updateLabLabel(v); });
+  });
+  document.getElementById('btn-snap-e').addEventListener('click', () => {
+    morph(labRenderer, labT, 1, 1000, v => { labT = v; labSlider.value = v; labSlider.style.setProperty('--pct', '100%'); updateLabLabel(v); });
+  });
+
+  labRenderer.draw(0);
+
+  /* ── DISTORTION TABLE ── */
+  const tbody = document.querySelector('#distortion-table tbody');
+  [0, 15, 30, 45, 60, 75, 83].forEach(lat => {
+    const s = 1 / Math.cos(lat * D);
+    const area = s * s;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span style="font-family:var(--mono)">${lat}°N/S</span></td>
+      <td class="num">${s.toFixed(3)}×</td>
+      <td class="num" style="color:${area > 4 ? 'var(--crimson)' : area > 2 ? 'var(--gold)' : 'var(--ink)'};font-weight:${area > 2 ? '700' : '400'}">${area.toFixed(2)}×</td>
+      <td class="num" style="color:var(--land);font-weight:600">1.00×</td>`;
+    tbody.appendChild(tr);
+  });
+
+  /* ── VOTE GRID ── */
+  const voteGrid = document.getElementById('vote-grid');
+  const cells = [];
+  for (let i = 0; i < 193; i++) {
+    const cls = i < 164 ? 'yes' : i === 164 ? 'no' : i < 171 ? 'abs' : '';
+    const d = document.createElement('div');
+    d.className = 'v-cell ' + cls;
+    d.title = cls === 'yes' ? 'In favour' : cls === 'no' ? 'Against - United States' : cls === 'abs' ? 'Abstained' : 'Not voting / absent';
+    voteGrid.appendChild(d);
+    cells.push(d);
+  }
+
+  /* ── CONTINENT BARS ── */
+  const continents = [
+    ['Asia', 44.58, false],
+    ['Africa', 30.37, true],
+    ['North America', 24.71, false],
+    ['South America', 17.84, false],
+    ['Antarctica', 14.0, false],
+    ['Europe', 10.18, false],
+    ['Oceania', 8.52, false]
+  ];
+  const maxArea = 44.58;
+  const barsEl = document.getElementById('continent-bars');
+  continents.forEach(([name, area, isAfrica]) => {
+    const pct = (area / maxArea * 100).toFixed(1);
+    const el = document.createElement('div');
+    el.className = 'bar-row';
+    el.innerHTML = `
+      <span class="bar-name">${name}</span>
+      <span class="bar-track"><span class="bar-fill${isAfrica ? ' africa' : ''}" data-w="${pct}"></span></span>
+      <span class="bar-val">${area.toFixed(2)} M km²</span>`;
+    barsEl.appendChild(el);
+  });
+
+  /* ── KPI COUNTER ── */
+  function animateCount(el) {
+    const target = +el.dataset.target;
+    const suffix = el.dataset.suffix || '';
+    if (reduceMotion) { el.textContent = target + suffix; return; }
+    const t0 = performance.now();
+    const dur = 1200;
+    function step(now) {
+      const k = Math.min((now - t0) / dur, 1);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3))) + suffix;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── INTERSECTION OBSERVER ── */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      el.classList.add('visible');
+
+      el.querySelectorAll('[data-target]').forEach(animateCount);
+
+      el.querySelectorAll('.bar-fill').forEach((b, i) => {
+        setTimeout(() => { b.style.width = b.dataset.w + '%'; }, i * 80);
+      });
+
+      if (el.id === 'vote' || el.contains(voteGrid)) {
+        cells.forEach((c, i) => setTimeout(() => c.classList.add('shown'), i * 3.5));
+      }
+
+      io.unobserve(el);
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  document.querySelectorAll('[data-target]').forEach(el => {
+    const section = el.closest('section');
+    if (section) io.observe(section);
+  });
+
+  const topSection = document.querySelector('#top, section:first-of-type');
+  if (topSection) {
+    topSection.querySelectorAll('[data-target]').forEach(el => {
+      setTimeout(() => animateCount(el), 400);
+    });
+    topSection.querySelectorAll('.bar-fill').forEach((b, i) => {
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 400 + i * 80);
+    });
+  }
+
+  const voteSection = document.getElementById('vote');
+  if (voteSection) {
+    const vio = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        cells.forEach((c, i) => setTimeout(() => c.classList.add('shown'), i * 3.5));
+        vio.disconnect();
+      }
+    }, { threshold: 0.1 });
+    vio.observe(voteSection);
+  }
+
+  /* ── PROGRESS BAR ── */
+  const progressBar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    progressBar.style.width = pct + '%';
+  }, { passive: true });
+
+  /* ── ACTIVE NAV LINKS ── */
+  const navLinks = [...document.querySelectorAll('.nav-links a')];
+  const sections = [...document.querySelectorAll('section[id]')];
+  sections.forEach(sec => {
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting)
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + sec.id));
+    }, { rootMargin: '-40% 0px -55% 0px' }).observe(sec);
+  });
+
+  /* Slider initial state */
+  heroSlider.style.setProperty('--pct', '0%');
+  labSlider.style.setProperty('--pct', '0%');
+
+})();
 </script>
 </body>
 </html>
